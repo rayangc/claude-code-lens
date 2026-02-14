@@ -1,11 +1,25 @@
-im looking for a way to visualize what my claude code and claude agent skd agents building/working on my machine are doing - specifically being able to see the agent thinking, tool calls, my messaages and eventually all the messages and session info for the claude code agent teams
+# Claude Code Lens
 
-dropping some inspiration that we ideally reverse engineer to build our own version, important that it looks and feel beautiful similar to bensbites cookbook url
+## Vision
 
-inspiration
-- https://cookbook.bensbites.com/cookbook/reverse-engineering-features/session/#msg-0 --> looking for a UI/UX just like this
-- https://github.com/bentossell/ralph-loop-ui --> which looks related to the cookbook
+A local tool for seeing what Claude Code and Claude Agent SDK agents are actually doing on my machine — the thinking, tool calls, messages, and session data — rendered in a beautiful, scannable UI.
 
-i build something similar in the past but wasn't that great - might be worth looking at here ~/dev-shared/playground/sideline
+## Why
 
-for viewing the agent teams output, we might want to borrow the approach/implementation (while ideally keeping the ui from ben tossell) from this repo: https://github.com/disler/claude-code-hooks-multi-agent-observability
+I want to get fundamentally better at using Claude Code and the Claude Agent SDK. Not by patching surface-level issues when the agent does something wrong, but by understanding what's happening under the hood — how the agent reasons, what tools it reaches for, where it gets stuck, what patterns lead to good vs bad outcomes.
+
+Right now that information exists in raw JSONL logs that are painful to read. Lens turns those logs into something I can actually browse, search, and learn from. The goal is to build deep intuition for how these agents work so I can steer them better — better prompts, better CLAUDE.md instructions, better architecture decisions.
+
+## Inspiration
+
+- **[Ben Tossell's Cookbook Session Viewer](https://cookbook.bensbites.com/cookbook/reverse-engineering-features/session/#msg-0)** — the UI/UX gold standard. Dark theme, monospace terminal feel, two-panel layout with sidebar navigation and message content. This is the look and feel we're going for.
+- **[Ralph Loop UI](https://github.com/bentossell/ralph-loop-ui)** — related to the cookbook, lightweight task dashboard approach.
+- **[Claude Code Hooks Multi-Agent Observability](https://github.com/disler/claude-code-hooks-multi-agent-observability)** — hook-based event capture with timeline views. Borrow the data approach for future real-time monitoring and team observability.
+
+## Prior Art
+
+Built a similar tool previously at `~/dev-shared/playground/sideline` — a single-file HTML viewer for Ralph loop logs. It works but is too basic, ugly, hard to navigate, and limited by the single-file architecture. Lens is the proper version.
+
+## Detailed Spec
+
+See [specs/claude-code-lens-v1.md](specs/claude-code-lens-v1.md) for the full V1 spec including architecture, data model, views, and scope.
