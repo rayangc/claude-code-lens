@@ -29,7 +29,7 @@ export function FilterToggle({ onChange }: FilterToggleProps) {
           }}
           className={`px-3 py-1 text-xs rounded-full transition-all duration-150 cursor-pointer ${
             active === opt.value
-              ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/40'
+              ? 'bg-accent-purple/20 text-accent-purple border border-accent-purple/40'
               : 'text-text-secondary hover:text-text-primary border border-transparent hover:border-border'
           }`}
         >

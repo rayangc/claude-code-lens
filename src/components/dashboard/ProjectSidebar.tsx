@@ -36,7 +36,7 @@ export function ProjectSidebar({ projects, loading, selectedProject, onSelect }:
                   onClick={() => onSelect(project)}
                   className={`w-full text-left px-4 py-3 text-xs transition-all duration-150 cursor-pointer border-l-2 ${
                     isActive
-                      ? 'border-l-indigo-500 bg-indigo-500/10 text-text-primary'
+                      ? 'border-l-accent-purple bg-accent-purple/10 text-text-primary'
                       : 'border-l-transparent hover:bg-elevated/50 text-text-secondary hover:text-text-primary'
                   }`}
                 >

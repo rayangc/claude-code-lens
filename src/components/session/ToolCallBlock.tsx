@@ -34,11 +34,11 @@ export function ToolCallBlock({ toolCall }: ToolCallBlockProps) {
 
   return (
     <div
-      className={`my-2 rounded border ${toolCall.isError ? 'border-red-500/40' : 'border-[#2a2a4a]'}`}
-      style={{ background: '#1e1e38' }}
+      className={`my-2 rounded border ${toolCall.isError ? 'border-red-500/40' : 'border-border'}`}
+      style={{ background: '#111111' }}
     >
       {/* Header */}
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-[#2a2a4a]">
+      <div className="flex items-center gap-2 px-3 py-2 border-b border-border">
         <span className={`w-1.5 h-1.5 rounded-full ${toolCall.isError ? 'bg-red-400' : 'bg-green-400'}`} />
         <span className="text-[12px] font-bold text-text-secondary">{toolCall.name}</span>
         {toolCall.isError && <span className="text-[10px] text-red-400 uppercase tracking-wider">error</span>}
@@ -46,7 +46,7 @@ export function ToolCallBlock({ toolCall }: ToolCallBlockProps) {
 
       {/* Prominent field */}
       {prominent && (
-        <div className="px-3 py-1.5 border-b border-[#2a2a4a] flex items-center gap-2">
+        <div className="px-3 py-1.5 border-b border-border flex items-center gap-2">
           <span className="text-[10px] text-text-tertiary uppercase tracking-wider">{prominent.label}</span>
           <code className="text-[12px] text-accent-cyan break-all">{prominent.value}</code>
           <CopyButton text={prominent.value} />
@@ -55,7 +55,7 @@ export function ToolCallBlock({ toolCall }: ToolCallBlockProps) {
 
       {/* Input JSON (collapsible for non-prominent tools) */}
       {!prominent && (
-        <div className="px-3 py-2 border-b border-[#2a2a4a]">
+        <div className="px-3 py-2 border-b border-border">
           <div className="flex items-center justify-between mb-1">
             <span className="text-[10px] text-text-tertiary uppercase tracking-wider">input</span>
             <CopyButton text={inputJson} />

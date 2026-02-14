@@ -54,30 +54,44 @@ function highlightText(text: string, query: string): React.ReactNode {
   );
 }
 
+function hasVisibleContent(msg: ParsedMessage): boolean {
+  if (msg.type !== 'user') return true;
+  // User messages with only tool_result blocks (no text) are system messages — hide them
+  return msg.content.some((b) => b.type === 'text' && b.text);
+}
+
 export function MessageContent({ messages, filter, searchQuery }: MessageContentProps) {
   const filtered = messages.filter((msg) => {
+    if (!hasVisibleContent(msg)) return false;
     if (filter === 'user') return msg.type === 'user';
     if (filter === 'conv') return true; // show all messages, but hide tool calls in render
     return true;
   });
 
+  // When search is active, only show matching messages
+  const displayed = searchQuery
+    ? filtered.filter((msg) => matchesSearch(msg, searchQuery))
+    : filtered;
+
   return (
     <div className="flex-1 overflow-y-auto px-6 py-6">
+      {searchQuery && (
+        <div className="max-w-[800px] mx-auto mb-3 text-[12px] text-text-tertiary">
+          {displayed.length} {displayed.length === 1 ? 'result' : 'results'} for &ldquo;{searchQuery}&rdquo;
+        </div>
+      )}
       <div className="max-w-[800px] mx-auto space-y-4">
-        {filtered.map((msg) => {
+        {displayed.map((msg) => {
           const isUser = msg.type === 'user';
           const text = getTextContent(msg);
-          const isMatch = searchQuery ? matchesSearch(msg, searchQuery) : false;
 
           return (
             <div
               key={msg.uuid}
               id={`msg-${msg.uuid}`}
-              className={`rounded-lg p-4 transition-all duration-150 ${
-                isMatch ? 'ring-1 ring-accent-cyan/40' : ''
-              }`}
+              className="rounded-lg p-4 transition-all duration-150"
               style={{
-                background: isUser ? '#2a2a4e' : '#222240',
+                background: isUser ? '#1a1a1a' : '#141414',
               }}
             >
               {/* Header */}

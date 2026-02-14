@@ -10,10 +10,10 @@ export function ThinkingBlock({ thinking }: ThinkingBlockProps) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="my-2 rounded border border-[#2a2a4a]" style={{ background: '#1e1e30' }}>
+    <div className="my-2 rounded border border-border" style={{ background: '#111111' }}>
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-2 w-full px-3 py-2 text-[12px] text-[#808098] hover:text-text-secondary transition-colors duration-150"
+        className="flex items-center gap-2 w-full px-3 py-2 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors duration-150"
       >
         <svg
           width="10"
@@ -34,7 +34,7 @@ export function ThinkingBlock({ thinking }: ThinkingBlockProps) {
         )}
       </button>
       {expanded && (
-        <div className="px-3 pb-3 text-[12px] text-[#808098] italic whitespace-pre-wrap leading-relaxed">
+        <div className="px-3 pb-3 text-[12px] text-text-tertiary italic whitespace-pre-wrap leading-relaxed">
           {thinking}
         </div>
       )}

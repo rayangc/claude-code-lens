@@ -15,7 +15,7 @@ export function SessionCard({ session }: SessionCardProps) {
   return (
     <button
       onClick={handleClick}
-      className="w-full text-left block bg-surface rounded-lg p-4 border border-border hover:border-indigo-500/40 transition-all duration-150 cursor-pointer hover:bg-elevated/50"
+      className="w-full text-left block bg-surface rounded-lg p-4 border border-border hover:border-accent-purple/40 transition-all duration-150 cursor-pointer hover:bg-elevated/50"
     >
       <div className="flex items-start justify-between gap-3">
         <p className="text-sm text-text-primary leading-snug flex-1">
@@ -38,7 +38,7 @@ export function SessionCard({ session }: SessionCardProps) {
         )}
         <span>{session.messageCount} msgs</span>
         {session.gitBranch && (
-          <span className="text-indigo-400/70 truncate max-w-[120px]">{session.gitBranch}</span>
+          <span className="text-accent-purple/70 truncate max-w-[120px]">{session.gitBranch}</span>
         )}
       </div>
     </button>

@@ -1,16 +1,17 @@
 @import "tailwindcss";
+/* theme v2 */
 
 :root {
-  --bg-primary: #1a1a2e;
-  --bg-surface: #222240;
-  --bg-elevated: #2a2a4a;
-  --accent-blue: #4a9eff;
-  --accent-purple: #8b5cf6;
-  --accent-cyan: #06b6d4;
-  --text-primary: #e8e8f0;
-  --text-secondary: #a0a0b8;
-  --text-tertiary: #606078;
-  --border: #333355;
+  --bg-primary: #0f0f0f;
+  --bg-surface: #171717;
+  --bg-elevated: #1f1f1f;
+  --accent-blue: #58a6ff;
+  --accent-purple: #a78bfa;
+  --accent-cyan: #22d3ee;
+  --text-primary: #e4e4e7;
+  --text-secondary: #a1a1aa;
+  --text-tertiary: #71717a;
+  --border: #27272a;
 }
 
 @theme inline {

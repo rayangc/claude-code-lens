@@ -37,6 +37,11 @@ function buildTree(messages: ParsedMessage[]): TreeNode[] {
   return roots;
 }
 
+function hasVisibleContent(msg: ParsedMessage): boolean {
+  if (msg.type !== 'user') return true;
+  return msg.content.some((b) => b.type === 'text' && b.text);
+}
+
 function getMessagePreview(msg: ParsedMessage): string {
   for (const block of msg.content) {
     if (block.type === 'text' && block.text) {
@@ -78,9 +83,46 @@ function TreeEntry({
   onNavigate: (uuid: string) => void;
 }) {
   const msg = node.message;
+
+  // Skip user messages with no text content (tool_result-only system messages)
+  if (!hasVisibleContent(msg)) {
+    return (
+      <>
+        {node.children.map((child) => (
+          <TreeEntry
+            key={child.message.uuid}
+            node={child}
+            depth={depth}
+            searchQuery={searchQuery}
+            activeMessageId={activeMessageId}
+            onNavigate={onNavigate}
+          />
+        ))}
+      </>
+    );
+  }
+
   const isUser = msg.type === 'user';
   const isActive = activeMessageId === msg.uuid;
   const isMatch = searchQuery ? matchesSearch(msg, searchQuery) : false;
+
+  // When search is active, hide non-matching entries
+  if (searchQuery && !isMatch) {
+    return (
+      <>
+        {node.children.map((child) => (
+          <TreeEntry
+            key={child.message.uuid}
+            node={child}
+            depth={depth}
+            searchQuery={searchQuery}
+            activeMessageId={activeMessageId}
+            onNavigate={onNavigate}
+          />
+        ))}
+      </>
+    );
+  }
 
   const colorClass = isUser
     ? 'text-accent-blue'

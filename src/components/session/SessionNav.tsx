@@ -1,7 +1,8 @@
 'use client';
 
+import { useMemo } from 'react';
 import Link from 'next/link';
-import type { ParsedSession } from '@/lib/types';
+import type { ParsedSession, ParsedMessage } from '@/lib/types';
 import { SearchBar } from './SearchBar';
 import { MessageTree } from './MessageTree';
 
@@ -47,6 +48,23 @@ export function SessionNav({
 }: SessionNavProps) {
   const { stats } = session;
 
+  const searchMatchCount = useMemo(() => {
+    if (!searchQuery) return 0;
+    const q = searchQuery.toLowerCase();
+    return session.messages.filter((msg: ParsedMessage) => {
+      for (const block of msg.content) {
+        if (block.text?.toLowerCase().includes(q)) return true;
+      }
+      for (const tc of msg.toolCalls) {
+        if (tc.name.toLowerCase().includes(q)) return true;
+        if (JSON.stringify(tc.input).toLowerCase().includes(q)) return true;
+        if (tc.output?.toLowerCase().includes(q)) return true;
+      }
+      if (msg.thinking?.toLowerCase().includes(q)) return true;
+      return false;
+    }).length;
+  }, [session.messages, searchQuery]);
+
   return (
     <div className="w-[300px] min-w-[300px] h-full flex flex-col bg-surface border-r border-border">
       {/* Back link */}
@@ -88,7 +106,7 @@ export function SessionNav({
       </div>
 
       {/* Search */}
-      <SearchBar onSearch={onSearch} />
+      <SearchBar onSearch={onSearch} matchCount={searchMatchCount} />
 
       {/* Filter toggles */}
       <div className="flex gap-1 px-3 pb-2">

@@ -4,9 +4,10 @@ import { useState, useCallback } from 'react';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
+  matchCount?: number;
 }
 
-export function SearchBar({ onSearch }: SearchBarProps) {
+export function SearchBar({ onSearch, matchCount }: SearchBarProps) {
   const [value, setValue] = useState('');
 
   const handleSubmit = useCallback(
@@ -46,10 +47,15 @@ export function SearchBar({ onSearch }: SearchBarProps) {
           value={value}
           onChange={handleChange}
           placeholder="Search messages..."
-          className="w-full bg-background border border-border rounded pl-7 pr-2 py-1.5
+          className="w-full bg-background border border-border rounded pl-7 pr-14 py-1.5
             text-[12px] text-foreground placeholder:text-text-tertiary
             focus:outline-none focus:border-accent-blue transition-colors duration-150"
         />
+        {value && matchCount !== undefined && (
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-text-tertiary">
+            {matchCount} {matchCount === 1 ? 'match' : 'matches'}
+          </span>
+        )}
       </div>
     </form>
   );
