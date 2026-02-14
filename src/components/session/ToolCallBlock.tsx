@@ -1,14 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CopyButton } from '@/components/ui/CopyButton';
 import type { ToolCall } from '@/lib/types';
 
 interface ToolCallBlockProps {
   toolCall: ToolCall;
+  forceOutputExpanded?: boolean | null;
 }
 
-function getProminent(toolCall: ToolCall): { label: string; value: string } | null {
+export function getProminent(toolCall: ToolCall): { label: string; value: string } | null {
   const { name, input } = toolCall;
   if (name === 'Bash' && typeof input.command === 'string') {
     return { label: '$', value: input.command };
@@ -25,8 +26,17 @@ function getProminent(toolCall: ToolCall): { label: string; value: string } | nu
   return null;
 }
 
-export function ToolCallBlock({ toolCall }: ToolCallBlockProps) {
-  const [outputExpanded, setOutputExpanded] = useState(false);
+export function ToolCallBlock({ toolCall, forceOutputExpanded = null }: ToolCallBlockProps) {
+  const [localExpanded, setLocalExpanded] = useState(false);
+  const outputExpanded = forceOutputExpanded !== null ? forceOutputExpanded : localExpanded;
+  const canToggle = forceOutputExpanded === null;
+
+  // Sync local state when force mode changes
+  useEffect(() => {
+    if (forceOutputExpanded === null) return;
+    setLocalExpanded(forceOutputExpanded);
+  }, [forceOutputExpanded]);
+
   const prominent = getProminent(toolCall);
   const outputLines = toolCall.output?.split('\n') ?? [];
   const isLongOutput = outputLines.length > 5;
@@ -35,7 +45,7 @@ export function ToolCallBlock({ toolCall }: ToolCallBlockProps) {
   return (
     <div
       className={`my-2 rounded border ${toolCall.isError ? 'border-red-500/40' : 'border-border'}`}
-      style={{ background: '#111111' }}
+      style={{ background: 'rgba(74, 222, 128, 0.03)' }}
     >
       {/* Header */}
       <div className="flex items-center gap-2 px-3 py-2 border-b border-border">
@@ -82,8 +92,8 @@ export function ToolCallBlock({ toolCall }: ToolCallBlockProps) {
           </pre>
           {isLongOutput && (
             <button
-              onClick={() => setOutputExpanded(!outputExpanded)}
-              className="mt-1 text-[11px] text-accent-blue hover:text-accent-cyan transition-colors duration-150"
+              onClick={() => canToggle && setLocalExpanded(!localExpanded)}
+              className={`mt-1 text-[11px] text-accent-blue hover:text-accent-cyan transition-colors duration-150 ${!canToggle ? 'cursor-default' : ''}`}
             >
               {outputExpanded ? '▲ Show less' : `▼ Show more (${outputLines.length} lines)`}
             </button>

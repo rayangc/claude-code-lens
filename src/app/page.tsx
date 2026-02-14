@@ -37,18 +37,43 @@ export default function Home() {
     ? selectedProject.path.split('/').filter(Boolean).pop() || selectedProject.name
     : null;
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
-      <ProjectSidebar
-        projects={projects}
-        loading={loading}
-        selectedProject={selectedProject}
-        onSelect={selectProject}
-      />
+      {/* Mobile hamburger button */}
+      <button
+        onClick={() => setSidebarOpen(true)}
+        className="fixed top-3 left-3 z-50 md:hidden p-2 rounded bg-surface border border-border text-text-secondary hover:text-text-primary"
+        aria-label="Open sidebar"
+      >
+        <span className="text-lg leading-none">&#9776;</span>
+      </button>
+
+      {/* Mobile backdrop */}
+      {sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+        />
+      )}
+
+      {/* Sidebar: slide-in on mobile, always visible on desktop */}
+      <div className={`fixed inset-y-0 left-0 z-50 transform transition-transform duration-200 ease-in-out md:relative md:transform-none ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+        <ProjectSidebar
+          projects={projects}
+          loading={loading}
+          selectedProject={selectedProject}
+          onSelect={(project) => {
+            selectProject(project);
+            setSidebarOpen(false);
+          }}
+        />
+      </div>
 
       <main className="flex-1 overflow-y-auto">
         {selectedProject ? (
-          <div className="p-6 max-w-4xl">
+          <div className="p-6 pt-14 md:pt-6 max-w-4xl">
             <div className="flex items-center justify-between mb-6">
               <h1 className="text-lg font-medium text-text-primary">{projectDisplayName}</h1>
               <FilterToggle onChange={setDateRange} />

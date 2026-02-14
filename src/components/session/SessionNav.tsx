@@ -130,6 +130,7 @@ export function SessionNav({
       <MessageTree
         messages={session.messages}
         searchQuery={searchQuery}
+        filter={filter}
         activeMessageId={activeMessageId}
         onNavigate={onNavigate}
       />

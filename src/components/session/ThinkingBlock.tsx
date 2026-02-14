@@ -1,19 +1,28 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface ThinkingBlockProps {
   thinking: string;
+  forceExpanded?: boolean | null;
 }
 
-export function ThinkingBlock({ thinking }: ThinkingBlockProps) {
-  const [expanded, setExpanded] = useState(false);
+export function ThinkingBlock({ thinking, forceExpanded = null }: ThinkingBlockProps) {
+  const [localExpanded, setLocalExpanded] = useState(false);
+  const expanded = forceExpanded !== null ? forceExpanded : localExpanded;
+  const canToggle = forceExpanded === null;
+
+  // Reset local state when force mode is cleared
+  useEffect(() => {
+    if (forceExpanded === null) return;
+    setLocalExpanded(forceExpanded);
+  }, [forceExpanded]);
 
   return (
-    <div className="my-2 rounded border border-border" style={{ background: '#111111' }}>
+    <div className="my-2 rounded border border-border" style={{ background: 'transparent' }}>
       <button
-        onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-2 w-full px-3 py-2 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors duration-150"
+        onClick={() => canToggle && setLocalExpanded(!localExpanded)}
+        className={`flex items-center gap-2 w-full px-3 py-2 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors duration-150 ${!canToggle ? 'cursor-default' : ''}`}
       >
         <svg
           width="10"
