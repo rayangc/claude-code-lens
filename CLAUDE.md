@@ -107,12 +107,13 @@ message field: { role, content (array of blocks), usage }
 - **Full spec**: `specs/claude-code-lens-v1.md`
 - **Reference screenshots**: `screenshots/` dir has cookbook screenshots showing keyboard shortcuts, filters, nesting, and mobile behavior
 
-### Key Cookbook UI Patterns to Match
-- **Keyboard shortcuts bar** at top: "Ctrl+T toggle thinking · Ctrl+O toggle tool outputs · Esc Reset"
-- **Left rail nesting**: Max 2 levels — user messages top-level, assistant text + tool names flat beneath. NOT deeply nested.
-- **Filters** apply to left rail only, not main content. Filter buttons: Default, No-tools, User. Plus a text "filter..." input.
-- **Message backgrounds**: User messages = distinct dark bg, tool calls = subtle green-tinted bg, assistant/thinking = default bg
-- **Mobile**: Hamburger menu to toggle sidebar visibility
+### Key Cookbook UI Patterns (Implemented in V1.2)
+- **Keyboard shortcuts bar** at top: "Ctrl+T toggle thinking · Ctrl+O toggle tool outputs · Esc Reset" — sticky, always visible
+- **Left rail nesting**: Max 2 levels — user messages top-level, assistant text + tool names (with previews) flat beneath
+- **Filters** apply to left rail only, not main content. Filter buttons: All, Conv, User. Plus search input filtering all content.
+- **Message backgrounds**: User messages = `#1a1a1a`, tool calls = `rgba(74, 222, 128, 0.03)` (green tint), assistant/thinking = transparent
+- **Mobile**: Hamburger menu (md breakpoint) to toggle sidebar on both dashboard and session views
+- **Scroll-to highlight**: Clicking a tree entry scrolls to the message and briefly highlights it with a cyan ring
 
 ## Self-Testing Protocol
 
@@ -139,15 +140,23 @@ Always test your changes before reporting done:
 - **Dev server runs in tmux** session "lens" — don't start another one, just hot-reload
 - **Git**: commit freely, ask before pushing
 
-## Current Status (V1.1)
+## Current Status (V1.2)
 
-### Completed
+### Completed (V1.0–V1.1)
 - Dashboard with project sidebar + session list + date filters
 - Session detail view with message tree, tool calls, thinking blocks
-- Search filters to show only matching messages (with match count)
+- Search within sessions (with match count)
 - Empty user messages (tool_result-only) hidden
 - Scanner fallback for projects without sessions-index.json
 - Improved color contrast
+
+### Completed (V1.2)
+- Keyboard shortcuts: Ctrl+T (toggle thinking), Ctrl+O (toggle tool outputs), Esc (reset) with sticky hint bar
+- Filters (All/Conv/User) affect left rail only — main content always shows all messages
+- Left rail flattened to max 2 levels with tool call previews (e.g., "Read — src/lib/types.ts")
+- Role-based message backgrounds: user (#1a1a1a), tool calls (green tint), assistant/thinking (transparent)
+- Mobile hamburger menu (md breakpoint) for both dashboard and session sidebars
+- Scroll-to-message highlighting (brief cyan ring on navigate)
 
 ### Known Limitations
 - Cost data often shows `<$0.01` (result events don't always include cost_usd)
