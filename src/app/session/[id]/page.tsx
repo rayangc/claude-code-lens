@@ -69,7 +69,7 @@ export default function SessionDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-background text-text-secondary">
+      <div className="flex items-center justify-center h-dvh bg-background text-text-secondary">
         <div className="flex items-center gap-3">
           <div className="w-4 h-4 border-2 border-accent-purple border-t-transparent rounded-full animate-spin" />
           <span className="text-[13px]">Loading session...</span>
@@ -80,7 +80,7 @@ export default function SessionDetailPage() {
 
   if (error || !session) {
     return (
-      <div className="flex items-center justify-center h-screen bg-background">
+      <div className="flex items-center justify-center h-dvh bg-background">
         <div className="text-center">
           <div className="text-red-400 text-[14px] mb-2">Failed to load session</div>
           <div className="text-text-tertiary text-[12px]">{error || 'Session not found'}</div>
@@ -90,7 +90,7 @@ export default function SessionDetailPage() {
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-dvh bg-background overflow-hidden">
       {/* Mobile hamburger button */}
       <button
         onClick={() => setSidebarOpen(true)}
@@ -121,9 +121,9 @@ export default function SessionDetailPage() {
         />
       </div>
 
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Sticky keyboard shortcuts hint bar */}
-        <div className="sticky top-0 z-10 flex items-center justify-center gap-4 px-4 py-1.5 text-[11px] text-text-tertiary bg-surface border-b border-border">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Keyboard shortcuts hint bar */}
+        <div className="shrink-0 flex items-center justify-center gap-4 px-4 py-1.5 text-[11px] text-text-tertiary bg-surface border-b border-border">
           <span><kbd className="px-1 py-0.5 rounded bg-elevated text-text-secondary text-[10px]">Ctrl+T</kbd> toggle thinking</span>
           <span className="text-border">·</span>
           <span><kbd className="px-1 py-0.5 rounded bg-elevated text-text-secondary text-[10px]">Ctrl+O</kbd> toggle tool outputs</span>

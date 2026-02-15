@@ -13,20 +13,15 @@ interface MessageTreeProps {
   onNavigate: (uuid: string) => void;
 }
 
-interface UserGroup {
-  userMessage: ParsedMessage;
-  children: ChildEntry[];
-}
-
-type ChildEntry = {
-  type: 'assistant-text';
+type TreeEntry = {
+  type: 'user';
   message: ParsedMessage;
   preview: string;
 } | {
-  type: 'tool-call';
+  type: 'assistant';
   message: ParsedMessage;
-  toolCall: ToolCall;
   preview: string;
+  toolCalls: { toolCall: ToolCall; preview: string }[];
 }
 
 function hasVisibleContent(msg: ParsedMessage): boolean {
@@ -46,7 +41,6 @@ function getTextPreview(msg: ParsedMessage): string {
 function getToolPreview(tc: ToolCall): string {
   const prominent = getProminent(tc);
   if (prominent) {
-    // Shorten file paths to just the filename
     const val = prominent.value.length > 40
       ? '...' + prominent.value.slice(-37)
       : prominent.value;
@@ -55,40 +49,38 @@ function getToolPreview(tc: ToolCall): string {
   return tc.name;
 }
 
-function buildGroups(messages: ParsedMessage[]): UserGroup[] {
-  const groups: UserGroup[] = [];
-  let currentGroup: UserGroup | null = null;
+function buildEntries(messages: ParsedMessage[]): TreeEntry[] {
+  const entries: TreeEntry[] = [];
 
   for (const msg of messages) {
     if (!hasVisibleContent(msg)) continue;
 
     if (msg.type === 'user') {
-      // Start a new group
-      currentGroup = { userMessage: msg, children: [] };
-      groups.push(currentGroup);
-    } else if (currentGroup) {
-      // Assistant message — add text preview if it has text
+      entries.push({
+        type: 'user',
+        message: msg,
+        preview: getTextPreview(msg) || '(empty)',
+      });
+    } else {
+      // Assistant message — level 1 with tool calls as children
       const textPreview = getTextPreview(msg);
-      if (textPreview) {
-        currentGroup.children.push({
-          type: 'assistant-text',
+      const toolCalls = msg.toolCalls.map((tc) => ({
+        toolCall: tc,
+        preview: getToolPreview(tc),
+      }));
+      // Only add if there's text or tool calls
+      if (textPreview || toolCalls.length > 0) {
+        entries.push({
+          type: 'assistant',
           message: msg,
-          preview: textPreview,
-        });
-      }
-      // Add each tool call as a separate entry
-      for (const tc of msg.toolCalls) {
-        currentGroup.children.push({
-          type: 'tool-call',
-          message: msg,
-          toolCall: tc,
-          preview: getToolPreview(tc),
+          preview: textPreview || '(tool calls)',
+          toolCalls,
         });
       }
     }
   }
 
-  return groups;
+  return entries;
 }
 
 function matchesSearch(msg: ParsedMessage, query: string): boolean {
@@ -116,113 +108,94 @@ function toolMatchesSearch(tc: ToolCall, query: string): boolean {
 }
 
 export function MessageTree({ messages, searchQuery, filter, activeMessageId, onNavigate }: MessageTreeProps) {
-  const groups = useMemo(() => buildGroups(messages), [messages]);
+  const entries = useMemo(() => buildEntries(messages), [messages]);
 
   return (
     <div className="flex-1 overflow-y-auto py-1">
-      {groups.map((group) => {
-        const userMsg = group.userMessage;
-        const userPreview = getTextPreview(userMsg) || '(empty)';
-        const isUserActive = activeMessageId === userMsg.uuid;
-        const userMatchesSearchQuery = searchQuery ? matchesSearch(userMsg, searchQuery) : false;
+      {entries.map((entry) => {
+        if (entry.type === 'user') {
+          // Filter: hide user entries only in non-applicable filters (user is always shown)
+          const isActive = activeMessageId === entry.message.uuid;
+          const isMatch = searchQuery ? matchesSearch(entry.message, searchQuery) : false;
 
-        // In search mode, check if user or any child matches
-        const anyChildMatches = searchQuery
-          ? group.children.some((child) => {
-              if (child.type === 'assistant-text') return matchesSearch(child.message, searchQuery);
-              if (child.type === 'tool-call') return toolMatchesSearch(child.toolCall, searchQuery);
-              return false;
-            })
-          : false;
+          if (searchQuery && !isMatch) return null;
 
-        // If search is active and neither user nor children match, skip this group
-        if (searchQuery && !userMatchesSearchQuery && !anyChildMatches) return null;
-
-        // Filter children based on filter mode
-        const filteredChildren = filter === 'user'
-          ? [] // user filter: no children
-          : filter === 'conv'
-            ? group.children.filter((c) => c.type === 'assistant-text') // conv: text only, no tools
-            : group.children; // all: everything
-
-        // Further filter by search if active
-        const displayedChildren = searchQuery
-          ? filteredChildren.filter((child) => {
-              if (child.type === 'assistant-text') return matchesSearch(child.message, searchQuery);
-              if (child.type === 'tool-call') return toolMatchesSearch(child.toolCall, searchQuery);
-              return false;
-            })
-          : filteredChildren;
-
-        return (
-          <div key={userMsg.uuid}>
-            {/* Level 1: User message */}
+          return (
             <button
-              onClick={() => onNavigate(userMsg.uuid)}
+              key={entry.message.uuid}
+              onClick={() => onNavigate(entry.message.uuid)}
               className={`w-full text-left px-2 py-1 text-[11px] leading-tight rounded transition-colors duration-150
                 hover:bg-elevated truncate block
-                ${isUserActive ? 'bg-elevated' : ''}
-                ${userMatchesSearchQuery ? 'ring-1 ring-accent-cyan/50' : ''}
+                ${isActive ? 'bg-elevated' : ''}
+                ${isMatch ? 'ring-1 ring-accent-cyan/50' : ''}
               `}
               style={{ paddingLeft: '8px' }}
-              title={userPreview}
+              title={entry.preview}
             >
               <span className="text-accent-blue font-medium">{'● '}</span>
-              <span className={userMatchesSearchQuery ? 'text-accent-cyan' : 'text-text-secondary'}>
-                {userPreview}
+              <span className="text-accent-blue text-[10px] font-medium">user: </span>
+              <span className={isMatch ? 'text-accent-cyan' : 'text-text-secondary'}>
+                {entry.preview}
+              </span>
+            </button>
+          );
+        }
+
+        // Assistant entry
+        if (filter === 'user') return null;
+
+        const isActive = activeMessageId === entry.message.uuid;
+        const entryMatchesSearch = searchQuery ? matchesSearch(entry.message, searchQuery) : false;
+        const anyToolMatches = searchQuery
+          ? entry.toolCalls.some((tc) => toolMatchesSearch(tc.toolCall, searchQuery))
+          : false;
+
+        if (searchQuery && !entryMatchesSearch && !anyToolMatches) return null;
+
+        // Determine which tool calls to show
+        const showToolCalls = filter === 'all';
+        const displayedToolCalls = showToolCalls
+          ? (searchQuery
+              ? entry.toolCalls.filter((tc) => entryMatchesSearch || toolMatchesSearch(tc.toolCall, searchQuery))
+              : entry.toolCalls)
+          : [];
+
+        return (
+          <div key={entry.message.uuid}>
+            <button
+              onClick={() => onNavigate(entry.message.uuid)}
+              className={`w-full text-left px-2 py-1 text-[11px] leading-tight rounded transition-colors duration-150
+                hover:bg-elevated truncate block
+                ${isActive ? 'bg-elevated' : ''}
+                ${entryMatchesSearch ? 'ring-1 ring-accent-cyan/50' : ''}
+              `}
+              style={{ paddingLeft: '8px' }}
+              title={entry.preview}
+            >
+              <span className="text-accent-purple font-medium">{'◦ '}</span>
+              <span className="text-accent-purple text-[10px] font-medium">assistant: </span>
+              <span className={entryMatchesSearch ? 'text-accent-cyan' : 'text-text-secondary'}>
+                {entry.preview}
               </span>
             </button>
 
-            {/* Level 2: Flat list of assistant text + tool calls */}
-            {displayedChildren.map((child, idx) => {
-              const isActive = activeMessageId === child.message.uuid;
-              const childKey = child.type === 'tool-call'
-                ? `tc-${child.toolCall.id}`
-                : `at-${child.message.uuid}-${idx}`;
-
-              const isMatch = searchQuery
-                ? (child.type === 'assistant-text'
-                    ? matchesSearch(child.message, searchQuery)
-                    : toolMatchesSearch(child.toolCall, searchQuery))
-                : false;
-
-              if (child.type === 'assistant-text') {
-                return (
-                  <button
-                    key={childKey}
-                    onClick={() => onNavigate(child.message.uuid)}
-                    className={`w-full text-left px-2 py-0.5 text-[11px] leading-tight rounded transition-colors duration-150
-                      hover:bg-elevated truncate block
-                      ${isActive ? 'bg-elevated' : ''}
-                      ${isMatch ? 'ring-1 ring-accent-cyan/50' : ''}
-                    `}
-                    style={{ paddingLeft: '20px' }}
-                    title={child.preview}
-                  >
-                    <span className="text-accent-purple font-medium">{'◦ '}</span>
-                    <span className={isMatch ? 'text-accent-cyan' : 'text-text-secondary'}>
-                      {child.preview}
-                    </span>
-                  </button>
-                );
-              }
-
-              // Tool call entry
+            {displayedToolCalls.map((tc) => {
+              const tcMatch = searchQuery ? toolMatchesSearch(tc.toolCall, searchQuery) : false;
               return (
                 <button
-                  key={childKey}
-                  onClick={() => onNavigate(child.message.uuid)}
+                  key={`tc-${tc.toolCall.id}`}
+                  onClick={() => onNavigate(entry.message.uuid)}
                   className={`w-full text-left px-2 py-0.5 text-[10px] text-text-tertiary leading-tight
                     hover:bg-elevated truncate block transition-colors duration-150
                     ${isActive ? 'bg-elevated' : ''}
-                    ${isMatch ? 'ring-1 ring-accent-cyan/50' : ''}
+                    ${tcMatch ? 'ring-1 ring-accent-cyan/50' : ''}
                   `}
-                  style={{ paddingLeft: '20px' }}
-                  title={child.preview}
+                  style={{ paddingLeft: '24px' }}
+                  title={tc.preview}
                 >
                   <span className="opacity-60">{'⚙ '}</span>
-                  <span className={isMatch ? 'text-accent-cyan' : ''}>
-                    {child.preview}
+                  <span className={tcMatch ? 'text-accent-cyan' : ''}>
+                    {tc.preview}
                   </span>
                 </button>
               );
