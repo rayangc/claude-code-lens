@@ -37,6 +37,7 @@ Tailscale IP for remote access: `100.123.90.13`
 | `GET /api/projects` | List all projects with session counts |
 | `GET /api/sessions?project=<encodedPath>` | Sessions for a project |
 | `GET /api/session/[id]` | Full parsed session with messages + tool calls |
+| `GET /api/stats` | Global aggregate stats (session count, token usage) |
 
 ### Key Libraries/Files
 | File | Purpose |
@@ -140,7 +141,7 @@ Always test your changes before reporting done:
 - **Dev server runs in tmux** session "lens" — don't start another one, just hot-reload
 - **Git**: commit freely, ask before pushing
 
-## Current Status (V1.2)
+## Current Status (V1.3)
 
 ### Completed (V1.0–V1.1)
 - Dashboard with project sidebar + session list + date filters
@@ -158,8 +159,15 @@ Always test your changes before reporting done:
 - Mobile hamburger menu (md breakpoint) for both dashboard and session sidebars
 - Scroll-to-message highlighting (brief cyan ring on navigate)
 
+### Completed (V1.3)
+- Fixed mobile scrolling: `dvh` viewport units, `overscroll-behavior: none`, proper overflow containment
+- Left rail hierarchy matches cookbook: user/assistant at same level with labels, tool calls nested under assistant
+- Global stats API (`GET /api/stats`) aggregating session count + token usage across all projects
+- Dashboard landing page shows hero stats (sessions, input tokens, output tokens) when no project selected
+
 ### Known Limitations
 - Cost data often shows `<$0.01` (result events don't always include cost_usd)
 - No file watcher — requires page refresh for new sessions
 - No virtualized scrolling — very large sessions may be slow
+- Stats API scans all JSONL files on each request (no caching) — may be slow with many sessions
 - Team session hierarchy is V2 scope
