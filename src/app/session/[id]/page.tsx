@@ -90,7 +90,7 @@ export default function SessionDetailPage() {
   }
 
   return (
-    <div className="flex h-dvh bg-background overflow-hidden">
+    <div className="flex h-dvh bg-background overflow-hidden max-w-[100vw]">
       {/* Mobile hamburger button */}
       <button
         onClick={() => setSidebarOpen(true)}
@@ -123,7 +123,7 @@ export default function SessionDetailPage() {
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Keyboard shortcuts hint bar */}
-        <div className="shrink-0 flex items-center justify-center gap-4 px-4 py-1.5 text-[11px] text-text-tertiary bg-surface border-b border-border">
+        <div className="shrink-0 flex items-center justify-center gap-2 md:gap-4 px-2 md:px-4 py-1.5 text-[10px] md:text-[11px] text-text-tertiary bg-surface border-b border-border flex-wrap">
           <span><kbd className="px-1 py-0.5 rounded bg-elevated text-text-secondary text-[10px]">Ctrl+T</kbd> toggle thinking</span>
           <span className="text-border">·</span>
           <span><kbd className="px-1 py-0.5 rounded bg-elevated text-text-secondary text-[10px]">Ctrl+O</kbd> toggle tool outputs</span>

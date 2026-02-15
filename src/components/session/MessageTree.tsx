@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import type { ParsedMessage } from '@/lib/types';
 import type { ToolCall } from '@/lib/types';
 import { getProminent } from './ToolCallBlock';
+import { parseTeammateMessage, type TeammateMessage } from '@/lib/parser/teammate';
 
 interface MessageTreeProps {
   messages: ParsedMessage[];
@@ -17,6 +18,7 @@ type TreeEntry = {
   type: 'user';
   message: ParsedMessage;
   preview: string;
+  teammate?: TeammateMessage;
 } | {
   type: 'assistant';
   message: ParsedMessage;
@@ -27,6 +29,13 @@ type TreeEntry = {
 function hasVisibleContent(msg: ParsedMessage): boolean {
   if (msg.type !== 'user') return true;
   return msg.content.some((b) => b.type === 'text' && b.text);
+}
+
+function getTextContent(msg: ParsedMessage): string {
+  return msg.content
+    .filter((b) => b.type === 'text' && b.text)
+    .map((b) => b.text!)
+    .join('\n');
 }
 
 function getTextPreview(msg: ParsedMessage): string {
@@ -49,6 +58,16 @@ function getToolPreview(tc: ToolCall): string {
   return tc.name;
 }
 
+/** Get a compact label for JSON protocol messages */
+function getProtocolLabel(tm: TeammateMessage): string {
+  switch (tm.jsonType) {
+    case 'shutdown_request': return '🔴 shutdown';
+    case 'shutdown_approved': return '⏹ shutdown';
+    case 'idle': return '💤 idle';
+    default: return tm.jsonType || 'protocol';
+  }
+}
+
 function buildEntries(messages: ParsedMessage[]): TreeEntry[] {
   const entries: TreeEntry[] = [];
 
@@ -56,10 +75,25 @@ function buildEntries(messages: ParsedMessage[]): TreeEntry[] {
     if (!hasVisibleContent(msg)) continue;
 
     if (msg.type === 'user') {
+      const text = getTextContent(msg);
+      const teammate = text ? parseTeammateMessage(text) : null;
+
+      let preview: string;
+      if (teammate) {
+        if (teammate.isJson) {
+          preview = getProtocolLabel(teammate);
+        } else {
+          preview = teammate.content.slice(0, 60).replace(/\n/g, ' ');
+        }
+      } else {
+        preview = getTextPreview(msg) || '(empty)';
+      }
+
       entries.push({
         type: 'user',
         message: msg,
-        preview: getTextPreview(msg) || '(empty)',
+        preview,
+        teammate: teammate ?? undefined,
       });
     } else {
       // Assistant message — level 1 with tool calls as children
@@ -114,11 +148,13 @@ export function MessageTree({ messages, searchQuery, filter, activeMessageId, on
     <div className="flex-1 overflow-y-auto py-1">
       {entries.map((entry) => {
         if (entry.type === 'user') {
-          // Filter: hide user entries only in non-applicable filters (user is always shown)
           const isActive = activeMessageId === entry.message.uuid;
           const isMatch = searchQuery ? matchesSearch(entry.message, searchQuery) : false;
 
           if (searchQuery && !isMatch) return null;
+
+          const label = entry.teammate ? entry.teammate.teammateId : 'user';
+          const isProtocol = entry.teammate?.isJson;
 
           return (
             <button
@@ -132,11 +168,14 @@ export function MessageTree({ messages, searchQuery, filter, activeMessageId, on
               style={{ paddingLeft: '8px' }}
               title={entry.preview}
             >
-              <span className="text-accent-blue font-medium">{'● '}</span>
-              <span className="text-accent-blue text-[10px] font-medium">user: </span>
-              <span className={isMatch ? 'text-accent-cyan' : 'text-text-secondary'}>
-                {entry.preview}
-              </span>
+              <span className="text-accent-blue text-[10px] font-medium">{label}: </span>
+              {isProtocol ? (
+                <span className="text-text-tertiary text-[10px]">{entry.preview}</span>
+              ) : (
+                <span className={isMatch ? 'text-accent-cyan' : 'text-text-secondary'}>
+                  {entry.preview}
+                </span>
+              )}
             </button>
           );
         }
@@ -172,7 +211,6 @@ export function MessageTree({ messages, searchQuery, filter, activeMessageId, on
               style={{ paddingLeft: '8px' }}
               title={entry.preview}
             >
-              <span className="text-accent-purple font-medium">{'◦ '}</span>
               <span className="text-accent-purple text-[10px] font-medium">assistant: </span>
               <span className={entryMatchesSearch ? 'text-accent-cyan' : 'text-text-secondary'}>
                 {entry.preview}

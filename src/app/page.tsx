@@ -61,7 +61,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex h-dvh bg-background text-foreground overflow-hidden">
+    <div className="flex h-dvh bg-background text-foreground overflow-hidden max-w-[100vw]">
       {/* Mobile hamburger button */}
       <button
         onClick={() => setSidebarOpen(true)}
@@ -113,16 +113,16 @@ export default function Home() {
 
               {/* Hero stats */}
               {stats ? (
-                <div className="flex gap-6 justify-center mb-8">
-                  <div className="bg-surface rounded-lg border border-border px-6 py-4 min-w-[140px]">
+                <div className="flex flex-wrap gap-4 md:gap-6 justify-center mb-8 px-4">
+                  <div className="bg-surface rounded-lg border border-border px-4 md:px-6 py-4 min-w-[110px] md:min-w-[140px]">
                     <div className="text-2xl font-bold text-accent-purple">{formatNumber(stats.totalSessions)}</div>
                     <div className="text-[11px] text-text-tertiary mt-1">sessions</div>
                   </div>
-                  <div className="bg-surface rounded-lg border border-border px-6 py-4 min-w-[140px]">
+                  <div className="bg-surface rounded-lg border border-border px-4 md:px-6 py-4 min-w-[110px] md:min-w-[140px]">
                     <div className="text-2xl font-bold text-accent-blue">{formatNumber(stats.totalInputTokens)}</div>
                     <div className="text-[11px] text-text-tertiary mt-1">input tokens</div>
                   </div>
-                  <div className="bg-surface rounded-lg border border-border px-6 py-4 min-w-[140px]">
+                  <div className="bg-surface rounded-lg border border-border px-4 md:px-6 py-4 min-w-[110px] md:min-w-[140px]">
                     <div className="text-2xl font-bold text-accent-cyan">{formatNumber(stats.totalOutputTokens)}</div>
                     <div className="text-[11px] text-text-tertiary mt-1">output tokens</div>
                   </div>

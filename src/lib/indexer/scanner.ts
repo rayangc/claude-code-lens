@@ -4,6 +4,7 @@ import { homedir } from 'os';
 import { createReadStream } from 'fs';
 import { createInterface } from 'readline';
 import { ProjectInfo, SessionSummary } from '../types';
+import { extractTeammateIds, parseTeammateMessage } from '../parser/teammate';
 
 const CLAUDE_PROJECTS_DIR = join(homedir(), '.claude', 'projects');
 
@@ -75,6 +76,38 @@ async function readLastLines(filePath: string, count: number): Promise<string[]>
   }
 }
 
+/** Lightweight scan: read up to N lines of a JSONL file looking for teammate-message tags in user events */
+async function detectTeamSession(filePath: string): Promise<{ isTeam: boolean; names: string[] }> {
+  const teammateIds = new Set<string>();
+  const lines = await readFirstLines(filePath, 50); // scan first 50 lines
+  for (const line of lines) {
+    try {
+      const event = JSON.parse(line);
+      if (event.type === 'user' && event.message?.content) {
+        const content = event.message.content;
+        const texts: string[] = [];
+        if (typeof content === 'string') {
+          texts.push(content);
+        } else if (Array.isArray(content)) {
+          for (const b of content) {
+            if (b.type === 'text' && b.text) texts.push(b.text);
+          }
+        }
+        for (const text of texts) {
+          if (text.includes('<teammate-message')) {
+            for (const id of extractTeammateIds(text)) {
+              teammateIds.add(id);
+            }
+          }
+        }
+      }
+    } catch {
+      // skip
+    }
+  }
+  return { isTeam: teammateIds.size > 0, names: Array.from(teammateIds).sort() };
+}
+
 async function scanJsonlFiles(projectDir: string): Promise<SessionSummary[]> {
   let files: string[];
   try {
@@ -115,13 +148,17 @@ async function scanJsonlFiles(projectDir: string): Promise<SessionSummary[]> {
           }
           if (!firstPrompt && event.type === 'user' && event.message?.content) {
             const content = event.message.content;
+            let rawText = '';
             if (typeof content === 'string') {
-              firstPrompt = content.slice(0, 200);
+              rawText = content;
             } else if (Array.isArray(content)) {
               const textBlock = content.find((b: { type: string }) => b.type === 'text');
-              if (textBlock?.text) {
-                firstPrompt = textBlock.text.slice(0, 200);
-              }
+              if (textBlock?.text) rawText = textBlock.text;
+            }
+            if (rawText) {
+              // Strip <teammate-message> wrapper if present
+              const tm = parseTeammateMessage(rawText);
+              firstPrompt = (tm ? tm.content : rawText).slice(0, 200);
             }
           }
         } catch {
@@ -146,6 +183,9 @@ async function scanJsonlFiles(projectDir: string): Promise<SessionSummary[]> {
       if (!modified) modified = fileStat.mtime.toISOString();
       if (!created) created = fileStat.birthtime.toISOString();
 
+      // Detect team sessions
+      const team = await detectTeamSession(filePath);
+
       sessions.push({
         sessionId,
         firstPrompt,
@@ -156,6 +196,8 @@ async function scanJsonlFiles(projectDir: string): Promise<SessionSummary[]> {
         gitBranch,
         projectPath,
         isSidechain: false,
+        isTeamSession: team.isTeam,
+        teammateNames: team.names,
       });
     } catch {
       // skip files we can't read
@@ -222,16 +264,31 @@ export async function getSessions(encodedPath: string): Promise<SessionSummary[]
   let sessions: SessionSummary[];
 
   if (index?.entries && index.entries.length > 0) {
-    sessions = index.entries.map((entry) => ({
-      sessionId: entry.sessionId,
-      firstPrompt: entry.firstPrompt || '',
-      summary: entry.summary || '',
-      messageCount: entry.messageCount || 0,
-      created: entry.created || '',
-      modified: entry.modified || '',
-      gitBranch: entry.gitBranch || '',
-      projectPath: entry.projectPath || '',
-      isSidechain: entry.isSidechain ?? false,
+    sessions = await Promise.all(index.entries.map(async (entry) => {
+      // Detect team sessions by scanning the JSONL file
+      let isTeamSession = false;
+      let teammateNames: string[] = [];
+      try {
+        const jsonlPath = join(projectDir, `${entry.sessionId}.jsonl`);
+        const team = await detectTeamSession(jsonlPath);
+        isTeamSession = team.isTeam;
+        teammateNames = team.names;
+      } catch {
+        // skip if file not found
+      }
+      return {
+        sessionId: entry.sessionId,
+        firstPrompt: entry.firstPrompt || '',
+        summary: entry.summary || '',
+        messageCount: entry.messageCount || 0,
+        created: entry.created || '',
+        modified: entry.modified || '',
+        gitBranch: entry.gitBranch || '',
+        projectPath: entry.projectPath || '',
+        isSidechain: entry.isSidechain ?? false,
+        isTeamSession,
+        teammateNames,
+      };
     }));
   } else {
     // Fallback: scan JSONL files directly

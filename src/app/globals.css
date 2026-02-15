@@ -29,8 +29,16 @@
 }
 
 html, body {
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: hidden;
   overscroll-behavior: none;
+  max-width: 100vw;
+}
+
+/* Prevent long text from causing horizontal overflow on mobile */
+.break-anywhere {
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 body {

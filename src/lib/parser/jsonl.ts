@@ -1,5 +1,6 @@
 import { ParsedSession, ParsedMessage, ContentBlock, ToolCall, SessionStats } from '../types';
 import { readFile } from 'fs/promises';
+import { extractTeammateIds, containsTeammateMessage } from './teammate';
 
 const SKIP_TYPES = new Set(['file-history-snapshot', 'summary', 'create', 'queue-operation']);
 
@@ -111,6 +112,22 @@ function buildSession(events: RawEvent[], sessionId: string): ParsedSession {
   stats.toolCallCount = Array.from(toolCallMap.values()).length;
   stats.model = model;
 
+  // Detect team sessions by scanning user messages for <teammate-message> tags
+  const allTeammateIds = new Set<string>();
+  for (const msg of messages) {
+    if (msg.type !== 'user') continue;
+    for (const block of msg.content) {
+      if (block.type === 'text' && block.text && containsTeammateMessage(block.text)) {
+        for (const id of extractTeammateIds(block.text)) {
+          allTeammateIds.add(id);
+        }
+      }
+    }
+  }
+
+  const isTeamSession = allTeammateIds.size > 0;
+  const teammateNames = Array.from(allTeammateIds).sort();
+
   return {
     id: sessionId,
     projectPath,
@@ -119,6 +136,8 @@ function buildSession(events: RawEvent[], sessionId: string): ParsedSession {
     model,
     messages,
     stats,
+    isTeamSession,
+    teammateNames,
   };
 }
 

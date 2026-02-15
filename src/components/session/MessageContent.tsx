@@ -3,6 +3,7 @@
 import type { ParsedMessage } from '@/lib/types';
 import { ToolCallBlock } from './ToolCallBlock';
 import { ThinkingBlock } from './ThinkingBlock';
+import { parseTeammateMessage, type TeammateMessage } from '@/lib/parser/teammate';
 
 interface MessageContentProps {
   messages: ParsedMessage[];
@@ -33,16 +34,83 @@ function hasVisibleContent(msg: ParsedMessage): boolean {
   return msg.content.some((b) => b.type === 'text' && b.text);
 }
 
+/** Render JSON protocol messages as compact status pills */
+function ProtocolPill({ teammate }: { teammate: TeammateMessage }) {
+  let emoji: string;
+  let label: string;
+  let detail: string | undefined;
+
+  switch (teammate.jsonType) {
+    case 'shutdown_request':
+      emoji = '🔴';
+      label = 'Shutdown requested';
+      detail = (teammate.jsonData?.reason as string) || (teammate.jsonData?.content as string) || undefined;
+      break;
+    case 'shutdown_approved':
+      emoji = '⏹';
+      label = 'Shutdown approved';
+      break;
+    case 'idle':
+      emoji = '💤';
+      label = 'Idle';
+      break;
+    default:
+      emoji = '📋';
+      label = teammate.jsonType || 'protocol';
+      break;
+  }
+
+  return (
+    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-elevated text-[12px] text-text-secondary">
+      <span>{emoji}</span>
+      <span>{label}</span>
+      {detail && <span className="text-text-tertiary">— {detail}</span>}
+    </div>
+  );
+}
+
 export function MessageContent({ messages, highlightedId, thinkingExpanded, toolOutputsExpanded }: MessageContentProps) {
   const displayed = messages.filter((msg) => hasVisibleContent(msg));
 
   return (
-    <div className="flex-1 overflow-y-auto px-6 py-6">
-      <div className="max-w-[800px] mx-auto space-y-4">
+    <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 py-6">
+      <div className="max-w-[800px] mx-auto space-y-4 break-anywhere">
         {displayed.map((msg) => {
           const isUser = msg.type === 'user';
           const text = getTextContent(msg);
           const isHighlighted = highlightedId === msg.uuid;
+
+          // Parse teammate message for user messages
+          const teammate = isUser && text ? parseTeammateMessage(text) : null;
+
+          // Determine label and color
+          let label: string;
+          let labelColor: string;
+          let labelIcon: string;
+          if (teammate) {
+            label = teammate.teammateId;
+            labelColor = 'text-accent-blue';
+            labelIcon = '\u2B24';
+          } else if (isUser) {
+            label = 'User';
+            labelColor = 'text-accent-blue';
+            labelIcon = '\u2B24';
+          } else {
+            label = 'Assistant';
+            labelColor = 'text-accent-purple';
+            labelIcon = '\u25C6';
+          }
+
+          // Determine displayed text content
+          let displayText: string | null = null;
+          if (teammate) {
+            if (!teammate.isJson) {
+              displayText = teammate.content;
+            }
+            // JSON protocol messages render as pills, no text block
+          } else {
+            displayText = text || null;
+          }
 
           return (
             <div
@@ -56,19 +124,22 @@ export function MessageContent({ messages, highlightedId, thinkingExpanded, tool
               {/* Header */}
               <div className="flex items-center gap-2 mb-2">
                 <span
-                  className={`text-[11px] font-bold uppercase tracking-wider ${
-                    isUser ? 'text-accent-blue' : 'text-accent-purple'
-                  }`}
+                  className={`text-[11px] font-bold uppercase tracking-wider ${labelColor}`}
                 >
-                  {isUser ? '\u2B24 User' : '\u25C6 Assistant'}
+                  {labelIcon} {label}
                 </span>
                 <span className="text-[10px] text-text-tertiary">{formatTime(msg.timestamp)}</span>
               </div>
 
+              {/* Protocol pill for JSON teammate messages */}
+              {teammate?.isJson && (
+                <ProtocolPill teammate={teammate} />
+              )}
+
               {/* Text content */}
-              {text && (
-                <div className="text-[13px] text-text-primary whitespace-pre-wrap leading-relaxed mb-2">
-                  {text}
+              {displayText && (
+                <div className="text-[13px] text-text-primary whitespace-pre-wrap leading-relaxed mb-2 overflow-wrap-anywhere">
+                  {displayText}
                 </div>
               )}
 

@@ -70,7 +70,7 @@ export function ToolCallBlock({ toolCall, forceOutputExpanded = null }: ToolCall
             <span className="text-[10px] text-text-tertiary uppercase tracking-wider">input</span>
             <CopyButton text={inputJson} />
           </div>
-          <pre className="text-[11px] text-text-secondary overflow-x-auto whitespace-pre-wrap leading-relaxed max-h-[200px] overflow-y-auto">
+          <pre className="text-[11px] text-text-secondary overflow-x-hidden whitespace-pre-wrap leading-relaxed max-h-[200px] overflow-y-auto break-anywhere">
             {inputJson}
           </pre>
         </div>
@@ -84,7 +84,7 @@ export function ToolCallBlock({ toolCall, forceOutputExpanded = null }: ToolCall
             <CopyButton text={toolCall.output} />
           </div>
           <pre
-            className={`text-[11px] text-text-secondary overflow-x-auto whitespace-pre-wrap leading-relaxed ${
+            className={`text-[11px] text-text-secondary overflow-x-hidden whitespace-pre-wrap leading-relaxed break-anywhere ${
               !outputExpanded && isLongOutput ? 'max-h-[100px] overflow-hidden' : 'max-h-[400px] overflow-y-auto'
             }`}
           >

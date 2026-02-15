@@ -20,6 +20,8 @@ export interface SessionSummary {
   duration?: number;
   cost?: number;
   toolCallCount?: number;
+  isTeamSession?: boolean;
+  teammateNames?: string[];
 }
 
 export interface ParsedSession {
@@ -30,6 +32,8 @@ export interface ParsedSession {
   model?: string;
   messages: ParsedMessage[];
   stats: SessionStats;
+  isTeamSession?: boolean;
+  teammateNames?: string[];
 }
 
 export interface ParsedMessage {

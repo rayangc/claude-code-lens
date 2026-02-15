@@ -18,13 +18,31 @@ export function SessionCard({ session }: SessionCardProps) {
       className="w-full text-left block bg-surface rounded-lg p-4 border border-border hover:border-accent-purple/40 transition-all duration-150 cursor-pointer hover:bg-elevated/50"
     >
       <div className="flex items-start justify-between gap-3">
-        <p className="text-sm text-text-primary leading-snug flex-1">
-          {truncate(session.firstPrompt || 'No prompt', 100)}
-        </p>
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <p className="text-sm text-text-primary leading-snug flex-1 min-w-0">
+            {truncate(session.firstPrompt || 'No prompt', 100)}
+          </p>
+          {session.isTeamSession && (
+            <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded bg-accent-cyan/10 text-accent-cyan border border-accent-cyan/20">
+              team
+            </span>
+          )}
+        </div>
         <span className="text-xs text-text-tertiary whitespace-nowrap shrink-0">
           {timeAgo(session.created)}
         </span>
       </div>
+
+      {/* Teammate names */}
+      {session.isTeamSession && session.teammateNames && session.teammateNames.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-2">
+          {session.teammateNames.map((name) => (
+            <span key={name} className="text-[10px] px-1.5 py-0.5 rounded bg-elevated text-text-secondary">
+              {name}
+            </span>
+          ))}
+        </div>
+      )}
 
       <div className="flex gap-4 mt-3 text-xs text-text-tertiary">
         {session.duration != null && (
