@@ -1,4 +1,4 @@
-import { readdir, readFile, stat, open } from 'fs/promises';
+import { access, readdir, readFile, stat, open } from 'fs/promises';
 import { join } from 'path';
 import { homedir } from 'os';
 import { createReadStream } from 'fs';
@@ -28,7 +28,7 @@ interface SessionIndex {
 }
 
 function decodePath(encodedDir: string): string {
-  // -Users-agent-foo → /Users/agent/foo
+  // -Users-you-project → /Users/you/project
   return encodedDir.replace(/-/g, '/');
 }
 
@@ -208,6 +208,7 @@ async function scanJsonlFiles(projectDir: string): Promise<SessionSummary[]> {
 }
 
 export async function getProjects(): Promise<ProjectInfo[]> {
+  try { await access(CLAUDE_PROJECTS_DIR); } catch { return []; }
   const entries = await readdir(CLAUDE_PROJECTS_DIR, { withFileTypes: true });
   const projects: ProjectInfo[] = [];
 
@@ -301,6 +302,7 @@ export async function getSessions(encodedPath: string): Promise<SessionSummary[]
 }
 
 export async function findSessionFile(sessionId: string): Promise<string | null> {
+  try { await access(CLAUDE_PROJECTS_DIR); } catch { return null; }
   const entries = await readdir(CLAUDE_PROJECTS_DIR, { withFileTypes: true });
 
   for (const entry of entries) {

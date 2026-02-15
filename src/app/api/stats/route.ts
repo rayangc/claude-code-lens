@@ -1,4 +1,4 @@
-import { readdir } from 'fs/promises';
+import { access, readdir } from 'fs/promises';
 import { join } from 'path';
 import { homedir } from 'os';
 import { createReadStream } from 'fs';
@@ -14,6 +14,9 @@ export async function GET() {
   let totalOutputTokens = 0;
 
   try {
+    try { await access(CLAUDE_PROJECTS_DIR); } catch {
+      return NextResponse.json({ totalSessions: 0, totalProjects: 0, totalInputTokens: 0, totalOutputTokens: 0 });
+    }
     const projectDirs = await readdir(CLAUDE_PROJECTS_DIR, { withFileTypes: true });
 
     for (const dir of projectDirs) {

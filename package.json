@@ -1,7 +1,12 @@
 {
-  "name": "app",
+  "name": "claude-code-lens",
   "version": "0.1.0",
+  "description": "A local viewer for Claude Code sessions",
   "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.18.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

@@ -10,9 +10,6 @@ npm run build            # Production build (verify before committing)
 npx next dev -H 0.0.0.0 # Bind to all interfaces (for remote access)
 ```
 
-The dev server is typically run in a tmux session: `tmux new-session -d -s lens "npx next dev -p 3000 -H 0.0.0.0"`
-
-Tailscale IP for remote access: `100.123.90.13`
 
 ## Tech Stack
 
@@ -86,7 +83,7 @@ src/
 ## JSONL Data Format
 
 - **Each JSONL file = one session** (no `system init` events for session boundaries)
-- **Directory encoding**: `/Users/agent/foo` → `-Users-agent-foo`
+- **Directory encoding**: `/Users/you/project` → `-Users-you-project`
 - **sessions-index.json** exists per project directory with session metadata; scanner falls back to direct JSONL scanning when missing
 - **Event types to process**: `user`, `assistant`, `result`
 - **Event types to skip**: `file-history-snapshot`, `summary`, `create`, `queue-operation`
@@ -105,7 +102,7 @@ message field: { role, content (array of blocks), usage }
 - **Primary inspiration**: Ben Tossell's Claude Code cookbook viewer (https://bensbites.com/claude-code-cookbook)
 - **Study the cookbook site** with agent-browser before making UI changes — match its patterns
 - **Theme**: Dark with terminal monospace typography
-- **Full spec**: `specs/claude-code-lens-v1.md`
+- **Full spec**: `docs/specs/claude-code-lens-v1.md`
 - **Reference screenshots**: `screenshots/` dir has cookbook screenshots showing keyboard shortcuts, filters, nesting, and mobile behavior
 
 ### Key Cookbook UI Patterns (Implemented in V1.2)
@@ -128,18 +125,16 @@ Always test your changes before reporting done:
 4. `npm run build` — must pass clean before committing
 5. Use `/frontend-design` skill for color/design judgement calls
 
-### Real session IDs for testing
-- `00774cdb-7e95-40dc-9f70-addc77147b99` (lamb-v2 project, has tool calls + thinking)
-- Browse `/api/projects` then `/api/sessions?project=<encodedPath>` to find more
+### Finding session IDs for testing
+- Browse `/api/projects` then `/api/sessions?project=<encodedPath>` to find real session IDs
+- Use a session with tool calls + thinking blocks for the best test coverage
 
 ## Working Conventions
 
-- **Don't modify files outside your assigned scope** when working in a team
 - **Tailwind config** (`tailwind.config.ts`) has custom colors and font stack — use the theme tokens, don't hardcode colors
 - **No tests yet** — relies on manual testing via curl + agent-browser
 - **Screenshots directory** is gitignored (may contain sensitive session data)
-- **Dev server runs in tmux** session "lens" — don't start another one, just hot-reload
-- **Git**: commit freely, ask before pushing
+- **Git**: Commit and push changes as needed
 
 ## Current Status (V1.3)
 
