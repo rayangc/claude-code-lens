@@ -1,7 +1,6 @@
 'use client';
 
 import type { ProjectInfo } from '@/lib/types';
-import { formatCost } from '@/lib/utils';
 
 interface ProjectSidebarProps {
   projects: ProjectInfo[];
@@ -43,7 +42,6 @@ export function ProjectSidebar({ projects, loading, selectedProject, onSelect }:
                   <div className="font-medium truncate">{projectName(project)}</div>
                   <div className="flex gap-3 mt-1 text-text-tertiary">
                     <span>{project.sessionCount} sessions</span>
-                    <span>{formatCost(project.totalCost)}</span>
                   </div>
                 </button>
               </li>

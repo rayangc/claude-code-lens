@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import type { ParsedMessage } from '@/lib/types';
 import { ToolCallBlock } from './ToolCallBlock';
 import { ThinkingBlock } from './ThinkingBlock';
@@ -36,33 +37,33 @@ function hasVisibleContent(msg: ParsedMessage): boolean {
 
 /** Render JSON protocol messages as compact status pills */
 function ProtocolPill({ teammate }: { teammate: TeammateMessage }) {
-  let emoji: string;
+  let dot: React.ReactNode;
   let label: string;
   let detail: string | undefined;
 
   switch (teammate.jsonType) {
     case 'shutdown_request':
-      emoji = '🔴';
+      dot = <span className="inline-block w-2 h-2 rounded-full bg-red-400 mr-1.5" />;
       label = 'Shutdown requested';
       detail = (teammate.jsonData?.reason as string) || (teammate.jsonData?.content as string) || undefined;
       break;
     case 'shutdown_approved':
-      emoji = '⏹';
+      dot = <span className="inline-block w-2 h-2 bg-gray-400 mr-1.5" />;
       label = 'Shutdown approved';
       break;
     case 'idle':
-      emoji = '💤';
+      dot = <span className="inline-block w-2 h-2 rounded-full bg-yellow-400 mr-1.5" />;
       label = 'Idle';
       break;
     default:
-      emoji = '📋';
+      dot = <span className="inline-block w-2 h-2 rounded-full bg-blue-400 mr-1.5" />;
       label = teammate.jsonType || 'protocol';
       break;
   }
 
   return (
     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-elevated text-[12px] text-text-secondary">
-      <span>{emoji}</span>
+      {dot}
       <span>{label}</span>
       {detail && <span className="text-text-tertiary">— {detail}</span>}
     </div>

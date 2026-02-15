@@ -118,26 +118,26 @@ The main viewer. Drill into a single session to see the full conversation with t
 ```
 ┌──────────────────────┬──────────────────────────────────────────────────────┐
 │                      │                                                      │
-│  ← Back to Dashboard │  👤 User                              timestamp     │
+│  ← Back to Dashboard │  User                              timestamp     │
 │                      │  [full user message]                                 │
 │  Session Metadata    │                                                      │
 │  Duration: 12m       │  ─────────────────────────────────────────────────── │
 │  Cost: $1.85         │                                                      │
-│  Tools: 34 calls     │  🤖 Assistant                                        │
+│  Tools: 34 calls     │  Assistant                                        │
 │                      │  [assistant text response]                           │
 │  Search: [________]  │                                                      │
 │                      │  Thinking... (click to expand)                       │
 │  [All] [Conv] [User] │                                                      │
 │                      │  ┌─ ToolName ────────────────────────────────────┐  │
 │  Message Tree:       │  │  { "param": "value", ... }                    │  │
-│  👤 User msg         │  │                                                │  │
-│  🤖 Assistant        │  │  [output / result]                            │  │
+│  User msg         │  │                                                │  │
+│  Assistant        │  │  [output / result]                            │  │
 │    ├─ Read file.ts   │  │  ... (click to expand)                        │  │
 │    ├─ Grep "query"   │  └───────────────────────────────────────────────┘  │
 │    ├─ Write comp.tsx │                                                      │
 │    └─ Bash: npm run  │  ┌─ Write ───────────────────────────────────────┐  │
-│  👤 User msg         │  │  "file_path": "src/Component.tsx"              │  │
-│  🤖 Assistant        │  │  ... (click to expand)                        │  │
+│  User msg         │  │  "file_path": "src/Component.tsx"              │  │
+│  Assistant        │  │  ... (click to expand)                        │  │
 │    └─ Task: subagent │  └───────────────────────────────────────────────┘  │
 │       ├─ Read...     │                                                      │
 │       └─ Write...    │                                                      │

@@ -2,6 +2,8 @@
 
 A local viewer for Claude Code sessions — browse conversations, inspect tool calls, and track usage.
 
+![Claude Code Lens dashboard](./public/screenshot.png)
+
 ## Features
 
 - **Project browser** — scan and list all Claude Code projects with session counts

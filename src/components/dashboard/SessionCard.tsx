@@ -1,7 +1,7 @@
 'use client';
 
 import type { SessionSummary } from '@/lib/types';
-import { timeAgo, formatDuration, formatCost, truncate } from '@/lib/utils';
+import { timeAgo, formatDuration, truncate } from '@/lib/utils';
 
 interface SessionCardProps {
   session: SessionSummary;
@@ -47,9 +47,6 @@ export function SessionCard({ session }: SessionCardProps) {
       <div className="flex gap-4 mt-3 text-xs text-text-tertiary">
         {session.duration != null && (
           <span>{formatDuration(session.duration)}</span>
-        )}
-        {session.cost != null && (
-          <span>{formatCost(session.cost)}</span>
         )}
         {session.toolCallCount != null && (
           <span>{session.toolCallCount} tools</span>

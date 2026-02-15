@@ -4,6 +4,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Claude Code Lens",
   description: "Observe and analyze Claude Code sessions",
+  icons: {
+    icon: '/icon.svg',
+  },
 };
 
 export default function RootLayout({

@@ -61,9 +61,9 @@ function getToolPreview(tc: ToolCall): string {
 /** Get a compact label for JSON protocol messages */
 function getProtocolLabel(tm: TeammateMessage): string {
   switch (tm.jsonType) {
-    case 'shutdown_request': return '🔴 shutdown';
-    case 'shutdown_approved': return '⏹ shutdown';
-    case 'idle': return '💤 idle';
+    case 'shutdown_request': return '[shutdown] requested';
+    case 'shutdown_approved': return '[stopped] approved';
+    case 'idle': return '[idle]';
     default: return tm.jsonType || 'protocol';
   }
 }

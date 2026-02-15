@@ -27,10 +27,6 @@ function formatDuration(seconds: number): string {
   return `${hrs}h ${mins % 60}m`;
 }
 
-function formatCost(cost: number): string {
-  return `$${cost.toFixed(2)}`;
-}
-
 const filters: { key: FilterMode; label: string }[] = [
   { key: 'all', label: 'All' },
   { key: 'conv', label: 'Conv' },
@@ -85,10 +81,6 @@ export function SessionNav({
           <div>
             <span className="text-text-tertiary">Duration</span>
             <div className="text-text-secondary">{formatDuration(stats.duration)}</div>
-          </div>
-          <div>
-            <span className="text-text-tertiary">Cost</span>
-            <div className="text-text-secondary">{formatCost(stats.cost)}</div>
           </div>
           <div>
             <span className="text-text-tertiary">Model</span>

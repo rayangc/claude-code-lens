@@ -40,5 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# screenshots (may contain sensitive session data)
-/screenshots/
+# local docs (screenshots, audit reports — may contain sensitive session data)
+/docs/local/
