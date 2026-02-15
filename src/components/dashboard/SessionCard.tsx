@@ -49,9 +49,9 @@ export function SessionCard({ session }: SessionCardProps) {
           <span>{formatDuration(session.duration)}</span>
         )}
         {session.toolCallCount != null && (
-          <span>{session.toolCallCount} tools</span>
+          <span>{session.toolCallCount} {session.toolCallCount === 1 ? 'tool' : 'tools'}</span>
         )}
-        <span>{session.messageCount} msgs</span>
+        <span>{session.messageCount} {session.messageCount === 1 ? 'msg' : 'msgs'}</span>
         {session.gitBranch && (
           <span className="text-accent-purple/70 truncate max-w-[120px]">{session.gitBranch}</span>
         )}

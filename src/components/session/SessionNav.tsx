@@ -66,7 +66,7 @@ export function SessionNav({
       {/* Back link */}
       <Link
         href="/"
-        className="flex items-center gap-1 px-3 py-3 text-[12px] text-text-secondary hover:text-accent-blue
+        className="flex items-center gap-1 px-3 py-1.5 text-[12px] text-text-secondary hover:text-accent-blue
           border-b border-border transition-colors duration-150"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

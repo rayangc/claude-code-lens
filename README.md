@@ -15,6 +15,20 @@ A local viewer for Claude Code sessions — browse conversations, inspect tool c
 - **Team session support** — teammate labels and protocol message rendering
 - **Dashboard with global stats** — aggregate session count and token usage across all projects
 
+## Screenshots
+
+### Project browser
+
+Browse all your Claude Code projects and their sessions at a glance.
+
+![Project browser showing session cards](./public/screenshot-sessions.png)
+
+### Session detail view
+
+Two-panel layout with a navigable message tree on the left and full conversation content on the right. Tool calls are rendered inline with expandable input/output blocks.
+
+![Session detail with tool calls and message tree](./public/screenshot-session-1.png)
+
 ## Prerequisites
 
 - **Node.js** 18.18 or later

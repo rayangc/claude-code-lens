@@ -41,7 +41,7 @@ export function ProjectSidebar({ projects, loading, selectedProject, onSelect }:
                 >
                   <div className="font-medium truncate">{projectName(project)}</div>
                   <div className="flex gap-3 mt-1 text-text-tertiary">
-                    <span>{project.sessionCount} sessions</span>
+                    <span>{project.sessionCount} {project.sessionCount === 1 ? 'session' : 'sessions'}</span>
                   </div>
                 </button>
               </li>
