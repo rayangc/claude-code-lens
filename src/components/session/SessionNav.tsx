@@ -17,16 +17,6 @@ interface SessionNavProps {
   activeMessageId: string | null;
   onNavigate: (uuid: string) => void;
 }
-
-function formatDuration(seconds: number): string {
-  if (seconds < 60) return `${seconds}s`;
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  if (mins < 60) return `${mins}m ${secs}s`;
-  const hrs = Math.floor(mins / 60);
-  return `${hrs}h ${mins % 60}m`;
-}
-
 const filters: { key: FilterMode; label: string }[] = [
   { key: 'all', label: 'All' },
   { key: 'conv', label: 'Conv' },
@@ -78,10 +68,6 @@ export function SessionNav({
       {/* Session metadata */}
       <div className="px-3 py-3 border-b border-border space-y-1.5">
         <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
-          <div>
-            <span className="text-text-tertiary">Duration</span>
-            <div className="text-text-secondary">{formatDuration(stats.duration)}</div>
-          </div>
           <div>
             <span className="text-text-tertiary">Model</span>
             <div className="text-text-secondary truncate">{stats.model || session.model || '—'}</div>
