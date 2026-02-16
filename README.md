@@ -1,8 +1,18 @@
 # Claude Code Lens
 
-A local viewer for Claude Code sessions — browse conversations, inspect tool calls, and track usage.
+A local tool for seeing what Claude Code and Claude Agent SDK agents are actually. Renders the thinking, tool calls, messages, and session data in a scannable UI
 
-![Claude Code Lens dashboard](./public/screenshot.png)
+## Why
+
+I built this because I wanted to understand what my Claude Code agents were actually doing. The raw JSONL session logs have the agent thinking, tool calls, messages between teammates but they're unreadable. I was especially curious about agent teams: how do they coordinate? What are they saying to each other? Super fun feature and I wanted to reverse-engineer it to figure out how to take better advantage of it
+
+Lens turns those logs into something browsable/readable. I use it to understand why the agent reaches for certain tools, spot patterns in how it reasons through problems, and study how teammates talk to each other. It started as tinkering and turned into something I use daily (makes for a good commute read)
+
+## Inspiration
+
+- **[Ben Tossell's Cookbook Session Viewer](https://cookbook.bensbites.com/cookbook/reverse-engineering-features/session/#msg-0)** — super nice UX. Dark theme, monospace terminal feel, two-panel layout with sidebar navigation and message content.
+- **[Ralph Loop UI](https://github.com/bentossell/ralph-loop-ui)** — related to the cookbook, lightweight task dashboard approach.
+- **[Claude Code Hooks Multi-Agent Observability](https://github.com/disler/claude-code-hooks-multi-agent-observability)** — hook-based event capture with timeline views. Data approach for future real-time monitoring and team observability.
 
 ## Features
 
@@ -16,6 +26,10 @@ A local viewer for Claude Code sessions — browse conversations, inspect tool c
 - **Dashboard with global stats** — aggregate session count and token usage across all projects
 
 ## Screenshots
+
+### Dashboard
+
+![Claude Code Lens dashboard](./public/screenshot.png)
 
 ### Project browser
 
