@@ -10,9 +10,30 @@ interface ProjectSidebarProps {
 }
 
 export function ProjectSidebar({ projects, loading, selectedProject, onSelect }: ProjectSidebarProps) {
-  const projectName = (p: ProjectInfo) => {
-    const segments = p.path.split('/').filter(Boolean);
-    return segments[segments.length - 1] || p.name;
+  const formatPath = (p: ProjectInfo) => {
+    let displayPath = p.path;
+
+    // Try to detect and replace home dir prefix (e.g., /Users/username → ~)
+    const homeMatch = displayPath.match(/^\/(?:Users|home)\/[^/]+/);
+    if (homeMatch) {
+      displayPath = '~' + displayPath.slice(homeMatch[0].length);
+    }
+
+    const segments = displayPath.split('/').filter(Boolean);
+    const projectName = segments[segments.length - 1] || p.name;
+    const parentSegments = segments.slice(0, -1);
+
+    // Truncate middle segments if path is long (keep first 2 and last 1 parent segments)
+    let parentPath: string;
+    if (parentSegments.length > 3) {
+      const start = parentSegments.slice(0, 2);
+      const end = parentSegments.slice(-1);
+      parentPath = (parentSegments[0] === '~' ? '' : '/') + [...start, '...', ...end].join('/');
+    } else {
+      parentPath = (parentSegments[0] === '~' ? '' : '/') + parentSegments.join('/');
+    }
+
+    return { parentPath, projectName };
   };
 
   return (
@@ -39,7 +60,15 @@ export function ProjectSidebar({ projects, loading, selectedProject, onSelect }:
                       : 'border-l-transparent hover:bg-elevated/50 text-text-secondary hover:text-text-primary'
                   }`}
                 >
-                  <div className="font-medium truncate">{projectName(project)}</div>
+                  {(() => {
+                    const { parentPath, projectName } = formatPath(project);
+                    return (
+                      <>
+                        <div className="font-medium truncate">{projectName}</div>
+                        <div className="truncate mt-0.5 text-text-tertiary">{parentPath}</div>
+                      </>
+                    );
+                  })()}
                   <div className="flex gap-3 mt-1 text-text-tertiary">
                     <span>{project.sessionCount} {project.sessionCount === 1 ? 'session' : 'sessions'}</span>
                   </div>

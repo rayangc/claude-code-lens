@@ -27,9 +27,40 @@ interface SessionIndex {
   entries: SessionIndexEntry[];
 }
 
-function decodePath(encodedDir: string): string {
-  // -Users-you-project → /Users/you/project
-  return encodedDir.replace(/-/g, '/');
+async function decodePath(encodedDir: string): Promise<string> {
+  // Encoded paths use - as separator, but directory names can also contain hyphens.
+  // Strategy: greedily match the longest real directory segments from left to right.
+  // e.g., -Users-agent-dev-shared-projects-claude-code-lens
+  //     → /Users/agent/dev-shared/projects/claude-code-lens
+  const parts = encodedDir.split('-').filter(Boolean); // ['Users','agent','dev','shared','projects','claude','code','lens']
+
+  const segments: string[] = [];
+  let i = 0;
+
+  while (i < parts.length) {
+    // Try longest possible segment first (greedy), then shrink
+    let matched = false;
+    for (let end = parts.length; end > i; end--) {
+      const candidate = parts.slice(i, end).join('-');
+      const testPath = '/' + [...segments, candidate].join('/');
+      try {
+        await access(testPath);
+        segments.push(candidate);
+        i = end;
+        matched = true;
+        break;
+      } catch {
+        // path doesn't exist, try shorter
+      }
+    }
+    if (!matched) {
+      // No valid path found — take single part as segment
+      segments.push(parts[i]);
+      i++;
+    }
+  }
+
+  return '/' + segments.join('/');
 }
 
 function getProjectName(decodedPath: string): string {
@@ -220,7 +251,7 @@ export async function getProjects(): Promise<ProjectInfo[]> {
     const index = await readSessionIndex(projectDir);
 
     // Use projectPath from index entries if available (more accurate than decoding)
-    const realPath = index?.entries?.[0]?.projectPath || decodePath(encodedPath);
+    const realPath = index?.entries?.[0]?.projectPath || await decodePath(encodedPath);
 
     let sessionCount = index?.entries?.length ?? 0;
     let totalCost = 0;

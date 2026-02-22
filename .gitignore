@@ -40,5 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# local docs (screenshots, audit reports — may contain sensitive session data)
+# local docs
 /docs/local/
