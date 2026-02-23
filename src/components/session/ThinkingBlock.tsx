@@ -9,6 +9,16 @@ interface ThinkingBlockProps {
 
 export function ThinkingBlock({ thinking, forceExpanded = null }: ThinkingBlockProps) {
   const [localExpanded, setLocalExpanded] = useState(false);
+  const [prevForce, setPrevForce] = useState<boolean | null>(null);
+
+  // Sync local state when force mode changes (adjust-state-during-render pattern)
+  if (forceExpanded !== prevForce) {
+    setPrevForce(forceExpanded);
+    if (forceExpanded !== null) {
+      setLocalExpanded(forceExpanded);
+    }
+  }
+
   const expanded = forceExpanded !== null ? forceExpanded : localExpanded;
   const canToggle = forceExpanded === null;
 
