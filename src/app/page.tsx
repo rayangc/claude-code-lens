@@ -6,7 +6,6 @@ import { useSessions } from '@/hooks/useSessions';
 import { ProjectSidebar } from '@/components/dashboard/ProjectSidebar';
 import { SessionList } from '@/components/dashboard/SessionList';
 import { FilterToggle, type DateRange } from '@/components/ui/FilterToggle';
-import { RefreshIndicator } from '@/components/ui/RefreshIndicator';
 
 interface Stats {
   totalSessions: number;
@@ -36,8 +35,8 @@ function filterByDate<T extends { created: string }>(sessions: T[], range: DateR
 }
 
 export default function Home() {
-  const { projects, loading, selectedProject, selectProject, lastRefreshed: projectsRefreshed, refresh: refreshProjects } = useProjects();
-  const { sessions, loading: sessionsLoading, error: sessionsError, lastRefreshed: sessionsRefreshed, refresh: refreshSessions } = useSessions(
+  const { projects, loading, selectedProject, selectProject } = useProjects();
+  const { sessions, loading: sessionsLoading, error: sessionsError } = useSessions(
     selectedProject?.encodedPath ?? null
   );
   const [dateRange, setDateRange] = useState<DateRange>('all');
@@ -64,11 +63,6 @@ export default function Home() {
   useEffect(() => {
     fetchStats();
   }, [fetchStats]);
-
-  const handleRefresh = useCallback(() => {
-    refreshProjects();
-    refreshSessions();
-  }, [refreshProjects, refreshSessions]);
 
   return (
     <div className="flex h-dvh bg-background text-foreground overflow-hidden max-w-[100vw]">
@@ -161,10 +155,6 @@ export default function Home() {
         )}
       </main>
 
-      <RefreshIndicator
-        lastRefreshed={selectedProject ? sessionsRefreshed : projectsRefreshed}
-        onRefresh={handleRefresh}
-      />
     </div>
   );
 }

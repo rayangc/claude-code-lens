@@ -24,10 +24,7 @@ export function useSession(sessionId: string, autoRefresh = true) {
       headers['If-None-Match'] = etagRef.current;
     }
 
-    const res = await fetch(`/api/session/${id}`, { headers });
-
-    // 304 Not Modified — file hasn't changed, skip update
-    if (res.status === 304) return;
+    const res = await fetch(`/api/session/${id}`, { headers, cache: 'no-store' });
 
     if (!res.ok) return;
 
@@ -37,8 +34,12 @@ export function useSession(sessionId: string, autoRefresh = true) {
       etagRef.current = newEtag;
     }
 
-    const data: ParsedSession = await res.json();
-    setSession(data);
+    const data = await res.json();
+
+    // Unchanged — file hasn't changed, skip update
+    if (data.unchanged) return;
+
+    setSession(data as ParsedSession);
   }, []);
 
   // Initial fetch (with loading state)
@@ -53,7 +54,7 @@ export function useSession(sessionId: string, autoRefresh = true) {
     setError(null);
     etagRef.current = null;
 
-    fetch(`/api/session/${sessionId}`)
+    fetch(`/api/session/${sessionId}`, { cache: 'no-store' })
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch session');
         const etag = res.headers.get('etag');

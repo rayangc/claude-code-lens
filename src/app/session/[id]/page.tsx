@@ -133,24 +133,24 @@ export default function SessionDetailPage() {
           <span className="text-border">·</span>
           <span><kbd className="px-1 py-0.5 rounded bg-elevated text-text-secondary text-[10px]">Ctrl+O</kbd> toggle tool outputs</span>
           <span className="text-border">·</span>
-          <span><kbd className="px-1 py-0.5 rounded bg-elevated text-text-secondary text-[10px]">Ctrl+R</kbd> auto-refresh {autoRefresh ? 'on' : 'off'}</span>
+          <span><kbd className="px-1 py-0.5 rounded bg-elevated text-text-secondary text-[10px]">Ctrl+R</kbd> toggle auto-refresh</span>
           <span className="text-border">·</span>
           <span><kbd className="px-1 py-0.5 rounded bg-elevated text-text-secondary text-[10px]">Esc</kbd> Reset</span>
         </div>
         <MessageContent
-          messages={session.messages}
+          messages={session.messages ?? []}
           highlightedId={highlightedId}
           thinkingExpanded={thinkingExpanded}
           toolOutputsExpanded={toolOutputsExpanded}
         />
       </div>
 
-      {autoRefresh && (
-        <RefreshIndicator
-          lastRefreshed={lastRefreshed}
-          onRefresh={refresh}
-        />
-      )}
+      <RefreshIndicator
+        lastRefreshed={lastRefreshed}
+        onRefresh={refresh}
+        active={autoRefresh}
+        onToggle={() => setAutoRefresh(prev => !prev)}
+      />
     </div>
   );
 }

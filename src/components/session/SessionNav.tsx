@@ -70,15 +70,15 @@ export function SessionNav({
         <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
           <div>
             <span className="text-text-tertiary">Model</span>
-            <div className="text-text-secondary truncate">{stats.model || session.model || '—'}</div>
+            <div className="text-text-secondary truncate">{stats?.model || session.model || '—'}</div>
           </div>
           <div>
             <span className="text-text-tertiary">Tools</span>
-            <div className="text-text-secondary">{stats.toolCallCount}</div>
+            <div className="text-text-secondary">{stats?.toolCallCount ?? '—'}</div>
           </div>
           <div>
             <span className="text-text-tertiary">Messages</span>
-            <div className="text-text-secondary">{stats.messageCount}</div>
+            <div className="text-text-secondary">{stats?.messageCount ?? '—'}</div>
           </div>
         </div>
       </div>
@@ -106,7 +106,7 @@ export function SessionNav({
 
       {/* Message tree */}
       <MessageTree
-        messages={session.messages}
+        messages={session.messages ?? []}
         searchQuery={searchQuery}
         filter={filter}
         activeMessageId={activeMessageId}

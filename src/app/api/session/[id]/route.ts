@@ -22,7 +22,7 @@ export async function GET(
     // Check If-None-Match — skip expensive parse if file hasn't changed
     const ifNoneMatch = request.headers.get('if-none-match');
     if (ifNoneMatch === etag) {
-      return new NextResponse(null, { status: 304, headers: { ETag: etag } });
+      return NextResponse.json({ unchanged: true }, { headers: { ETag: etag } });
     }
 
     const session = await parseJsonlFile(filePath);
