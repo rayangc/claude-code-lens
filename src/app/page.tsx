@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useProjects } from '@/hooks/useProjects';
 import { useSessions } from '@/hooks/useSessions';
 import { ProjectSidebar } from '@/components/dashboard/ProjectSidebar';
 import { SessionList } from '@/components/dashboard/SessionList';
 import { FilterToggle, type DateRange } from '@/components/ui/FilterToggle';
+import { RefreshIndicator } from '@/components/ui/RefreshIndicator';
 
 interface Stats {
   totalSessions: number;
@@ -35,8 +36,8 @@ function filterByDate<T extends { created: string }>(sessions: T[], range: DateR
 }
 
 export default function Home() {
-  const { projects, loading, selectedProject, selectProject } = useProjects();
-  const { sessions, loading: sessionsLoading, error: sessionsError } = useSessions(
+  const { projects, loading, selectedProject, selectProject, lastRefreshed: projectsRefreshed, refresh: refreshProjects } = useProjects();
+  const { sessions, loading: sessionsLoading, error: sessionsError, lastRefreshed: sessionsRefreshed, refresh: refreshSessions } = useSessions(
     selectedProject?.encodedPath ?? null
   );
   const [dateRange, setDateRange] = useState<DateRange>('all');
@@ -53,12 +54,21 @@ export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
 
-  useEffect(() => {
+  const fetchStats = useCallback(() => {
     fetch('/api/stats')
       .then(res => res.json())
       .then(data => setStats(data))
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
+
+  const handleRefresh = useCallback(() => {
+    refreshProjects();
+    refreshSessions();
+  }, [refreshProjects, refreshSessions]);
 
   return (
     <div className="flex h-dvh bg-background text-foreground overflow-hidden max-w-[100vw]">
@@ -111,7 +121,7 @@ export default function Home() {
             <div className="text-center">
               <h1 className="text-xl font-medium text-text-primary mb-8">Claude Code Lens</h1>
 
-              {/* Hero stats */}
+              {/* Hero stats with manual refresh */}
               {stats ? (
                 <div className="flex flex-wrap gap-4 md:gap-6 justify-center mb-8 px-4">
                   <div className="bg-surface rounded-lg border border-border px-4 md:px-6 py-4 min-w-[110px] md:min-w-[140px]">
@@ -138,11 +148,23 @@ export default function Home() {
                 </div>
               )}
 
+              <button
+                onClick={fetchStats}
+                className="text-[11px] text-text-tertiary hover:text-text-secondary transition-colors mb-4"
+                title="Refresh stats"
+              >
+                &#x21bb; Refresh stats
+              </button>
               <p className="text-sm text-text-tertiary">Select a project to explore</p>
             </div>
           </div>
         )}
       </main>
+
+      <RefreshIndicator
+        lastRefreshed={selectedProject ? sessionsRefreshed : projectsRefreshed}
+        onRefresh={handleRefresh}
+      />
     </div>
   );
 }

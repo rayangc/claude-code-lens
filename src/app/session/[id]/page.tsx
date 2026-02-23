@@ -5,11 +5,13 @@ import { useParams } from 'next/navigation';
 import { useSession } from '@/hooks/useSession';
 import { SessionNav, type FilterMode } from '@/components/session/SessionNav';
 import { MessageContent } from '@/components/session/MessageContent';
+import { RefreshIndicator } from '@/components/ui/RefreshIndicator';
 
 export default function SessionDetailPage() {
   const params = useParams();
   const sessionId = params.id as string;
-  const { session, loading, error } = useSession(sessionId);
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const { session, loading, error, lastRefreshed, refresh } = useSession(sessionId, autoRefresh);
 
   const [filter, setFilter] = useState<FilterMode>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,6 +50,9 @@ export default function SessionDetailPage() {
       } else if (e.key === 'o' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         setToolOutputsExpanded((prev) => (prev === null ? true : !prev));
+      } else if (e.key === 'r' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        setAutoRefresh(prev => !prev);
       } else if (e.key === 'Escape') {
         setThinkingExpanded(null);
         setToolOutputsExpanded(null);
@@ -128,6 +133,8 @@ export default function SessionDetailPage() {
           <span className="text-border">·</span>
           <span><kbd className="px-1 py-0.5 rounded bg-elevated text-text-secondary text-[10px]">Ctrl+O</kbd> toggle tool outputs</span>
           <span className="text-border">·</span>
+          <span><kbd className="px-1 py-0.5 rounded bg-elevated text-text-secondary text-[10px]">Ctrl+R</kbd> auto-refresh {autoRefresh ? 'on' : 'off'}</span>
+          <span className="text-border">·</span>
           <span><kbd className="px-1 py-0.5 rounded bg-elevated text-text-secondary text-[10px]">Esc</kbd> Reset</span>
         </div>
         <MessageContent
@@ -137,6 +144,13 @@ export default function SessionDetailPage() {
           toolOutputsExpanded={toolOutputsExpanded}
         />
       </div>
+
+      {autoRefresh && (
+        <RefreshIndicator
+          lastRefreshed={lastRefreshed}
+          onRefresh={refresh}
+        />
+      )}
     </div>
   );
 }
