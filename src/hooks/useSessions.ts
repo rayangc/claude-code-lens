@@ -25,27 +25,27 @@ export function useSessions(encodedPath: string | null) {
 
   // Initial fetch (with loading state)
   useEffect(() => {
-    if (!encodedPath) return;
+    if (!encodedPath) {
+      setSessions([]);
+      setLoading(false);
+      return;
+    }
 
-    // All setState calls inside .then()/.catch() callbacks to satisfy react-hooks/set-state-in-effect
-    Promise.resolve()
-      .then(() => {
-        setLoading(true);
-        setError(null);
-        return fetch(`/api/sessions?project=${encodedPath}`);
-      })
-      .then(res => {
+    setLoading(true);
+    setError(null);
+
+    (async () => {
+      try {
+        const res = await fetch(`/api/sessions?project=${encodedPath}`);
         if (!res.ok) throw new Error('Failed to fetch sessions');
-        return res.json();
-      })
-      .then((data: SessionSummary[]) => {
+        const data: SessionSummary[] = await res.json();
         setSessions(data);
         setLoading(false);
-      })
-      .catch(err => {
+      } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');
         setLoading(false);
-      });
+      }
+    })();
   }, [encodedPath]);
 
   const { lastRefreshed, refresh } = usePolling({
@@ -54,5 +54,5 @@ export function useSessions(encodedPath: string | null) {
     enabled: !!encodedPath,
   });
 
-  return { sessions: !encodedPath ? [] : sessions, loading, error, lastRefreshed, refresh };
+  return { sessions, loading, error, lastRefreshed, refresh };
 }

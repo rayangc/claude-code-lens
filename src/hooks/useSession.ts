@@ -44,31 +44,31 @@ export function useSession(sessionId: string, autoRefresh = true) {
 
   // Initial fetch (with loading state)
   useEffect(() => {
-    if (!sessionId) return;
+    if (!sessionId) {
+      setSession(null);
+      setLoading(false);
+      setError('No session ID provided');
+      return;
+    }
 
     etagRef.current = null;
+    setLoading(true);
+    setError(null);
 
-    // All setState calls inside .then()/.catch() callbacks to satisfy react-hooks/set-state-in-effect
-    Promise.resolve()
-      .then(() => {
-        setLoading(true);
-        setError(null);
-        return fetch(`/api/session/${sessionId}`, { cache: 'no-store' });
-      })
-      .then(res => {
+    (async () => {
+      try {
+        const res = await fetch(`/api/session/${sessionId}`, { cache: 'no-store' });
         if (!res.ok) throw new Error('Failed to fetch session');
         const etag = res.headers.get('etag');
         if (etag) etagRef.current = etag;
-        return res.json();
-      })
-      .then((data: ParsedSession) => {
+        const data: ParsedSession = await res.json();
         setSession(data);
         setLoading(false);
-      })
-      .catch(err => {
+      } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');
         setLoading(false);
-      });
+      }
+    })();
   }, [sessionId]);
 
   const { lastRefreshed, refresh } = usePolling({
@@ -77,11 +77,5 @@ export function useSession(sessionId: string, autoRefresh = true) {
     enabled: !!sessionId && autoRefresh,
   });
 
-  return {
-    session,
-    loading: !sessionId ? false : loading,
-    error: !sessionId ? 'No session ID provided' : error,
-    lastRefreshed,
-    refresh,
-  };
+  return { session, loading, error, lastRefreshed, refresh };
 }
