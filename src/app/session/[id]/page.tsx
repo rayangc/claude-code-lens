@@ -10,7 +10,11 @@ import { RefreshIndicator } from '@/components/ui/RefreshIndicator';
 export default function SessionDetailPage() {
   const params = useParams();
   const sessionId = params.id as string;
-  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [autoRefresh, setAutoRefresh] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    const stored = sessionStorage.getItem('claude-lens:auto-refresh');
+    return stored === null ? true : stored === 'true';
+  });
   const { session, loading, error, lastRefreshed, refresh } = useSession(sessionId, autoRefresh);
 
   const [filter, setFilter] = useState<FilterMode>('all');
@@ -61,6 +65,11 @@ export default function SessionDetailPage() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // Persist auto-refresh preference for the browsing session
+  useEffect(() => {
+    sessionStorage.setItem('claude-lens:auto-refresh', String(autoRefresh));
+  }, [autoRefresh]);
 
   // Handle deep-linking via hash
   useEffect(() => {
