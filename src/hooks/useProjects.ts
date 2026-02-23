@@ -12,7 +12,7 @@ export function useProjects() {
   const selectedProjectRef = useRef<ProjectInfo | null>(null);
 
   // Keep ref in sync for use in refetch
-  selectedProjectRef.current = selectedProject;
+  useEffect(() => { selectedProjectRef.current = selectedProject; }, [selectedProject]);
 
   // Silent refetch — never sets loading=true
   const refetch = useCallback(async () => {

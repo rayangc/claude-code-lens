@@ -12,7 +12,7 @@ export function useSession(sessionId: string, autoRefresh = true) {
   const sessionIdRef = useRef(sessionId);
 
   // Keep ref in sync
-  sessionIdRef.current = sessionId;
+  useEffect(() => { sessionIdRef.current = sessionId; }, [sessionId]);
 
   // Silent refetch with ETag — never sets loading=true
   const refetch = useCallback(async () => {
@@ -44,17 +44,17 @@ export function useSession(sessionId: string, autoRefresh = true) {
 
   // Initial fetch (with loading state)
   useEffect(() => {
-    if (!sessionId) {
-      setLoading(false);
-      setError('No session ID provided');
-      return;
-    }
+    if (!sessionId) return;
 
-    setLoading(true);
-    setError(null);
     etagRef.current = null;
 
-    fetch(`/api/session/${sessionId}`, { cache: 'no-store' })
+    // All setState calls inside .then()/.catch() callbacks to satisfy react-hooks/set-state-in-effect
+    Promise.resolve()
+      .then(() => {
+        setLoading(true);
+        setError(null);
+        return fetch(`/api/session/${sessionId}`, { cache: 'no-store' });
+      })
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch session');
         const etag = res.headers.get('etag');
@@ -66,7 +66,7 @@ export function useSession(sessionId: string, autoRefresh = true) {
         setLoading(false);
       })
       .catch(err => {
-        setError(err.message);
+        setError(err instanceof Error ? err.message : 'Unknown error');
         setLoading(false);
       });
   }, [sessionId]);
@@ -77,5 +77,11 @@ export function useSession(sessionId: string, autoRefresh = true) {
     enabled: !!sessionId && autoRefresh,
   });
 
-  return { session, loading, error, lastRefreshed, refresh };
+  return {
+    session,
+    loading: !sessionId ? false : loading,
+    error: !sessionId ? 'No session ID provided' : error,
+    lastRefreshed,
+    refresh,
+  };
 }

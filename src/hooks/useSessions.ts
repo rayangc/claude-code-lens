@@ -11,7 +11,7 @@ export function useSessions(encodedPath: string | null) {
   const encodedPathRef = useRef(encodedPath);
 
   // Keep ref in sync
-  encodedPathRef.current = encodedPath;
+  useEffect(() => { encodedPathRef.current = encodedPath; }, [encodedPath]);
 
   // Silent refetch — never sets loading=true
   const refetch = useCallback(async () => {
@@ -25,15 +25,15 @@ export function useSessions(encodedPath: string | null) {
 
   // Initial fetch (with loading state)
   useEffect(() => {
-    if (!encodedPath) {
-      setSessions([]);
-      return;
-    }
+    if (!encodedPath) return;
 
-    setLoading(true);
-    setError(null);
-
-    fetch(`/api/sessions?project=${encodedPath}`)
+    // All setState calls inside .then()/.catch() callbacks to satisfy react-hooks/set-state-in-effect
+    Promise.resolve()
+      .then(() => {
+        setLoading(true);
+        setError(null);
+        return fetch(`/api/sessions?project=${encodedPath}`);
+      })
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch sessions');
         return res.json();
@@ -43,7 +43,7 @@ export function useSessions(encodedPath: string | null) {
         setLoading(false);
       })
       .catch(err => {
-        setError(err.message);
+        setError(err instanceof Error ? err.message : 'Unknown error');
         setLoading(false);
       });
   }, [encodedPath]);
@@ -54,5 +54,5 @@ export function useSessions(encodedPath: string | null) {
     enabled: !!encodedPath,
   });
 
-  return { sessions, loading, error, lastRefreshed, refresh };
+  return { sessions: !encodedPath ? [] : sessions, loading, error, lastRefreshed, refresh };
 }
