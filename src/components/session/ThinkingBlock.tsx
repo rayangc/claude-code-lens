@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 interface ThinkingBlockProps {
   thinking: string;
@@ -9,14 +9,18 @@ interface ThinkingBlockProps {
 
 export function ThinkingBlock({ thinking, forceExpanded = null }: ThinkingBlockProps) {
   const [localExpanded, setLocalExpanded] = useState(false);
+  const [prevForce, setPrevForce] = useState<boolean | null>(null);
+
+  // Sync local state when force mode changes (adjust-state-during-render pattern)
+  if (forceExpanded !== prevForce) {
+    setPrevForce(forceExpanded);
+    if (forceExpanded !== null) {
+      setLocalExpanded(forceExpanded);
+    }
+  }
+
   const expanded = forceExpanded !== null ? forceExpanded : localExpanded;
   const canToggle = forceExpanded === null;
-
-  // Reset local state when force mode is cleared
-  useEffect(() => {
-    if (forceExpanded === null) return;
-    setLocalExpanded(forceExpanded);
-  }, [forceExpanded]);
 
   return (
     <div className="my-2 rounded border border-border" style={{ background: 'transparent' }}>

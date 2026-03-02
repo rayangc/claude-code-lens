@@ -160,9 +160,12 @@ Always test your changes before reporting done:
 - Global stats API (`GET /api/stats`) aggregating session count + token usage across all projects
 - Dashboard landing page shows hero stats (sessions, input tokens, output tokens) when no project selected
 
+### Completed (V1.4)
+- Auto-refresh via interval polling with ETag/304 optimization — projects, sessions, and session detail update live without page reload
+- Ctrl+R to toggle auto-refresh; RefreshIndicator shows status in bottom-right corner
+
 ### Known Limitations
 - Cost data often shows `<$0.01` (result events don't always include cost_usd)
-- No file watcher — requires page refresh for new sessions
 - No virtualized scrolling — very large sessions may be slow
 - Stats API scans all JSONL files on each request (no caching) — may be slow with many sessions
 - Team session hierarchy is V2 scope

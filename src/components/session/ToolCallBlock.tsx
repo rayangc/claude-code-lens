@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { CopyButton } from '@/components/ui/CopyButton';
 import type { ToolCall } from '@/lib/types';
 
@@ -28,14 +28,18 @@ export function getProminent(toolCall: ToolCall): { label: string; value: string
 
 export function ToolCallBlock({ toolCall, forceOutputExpanded = null }: ToolCallBlockProps) {
   const [localExpanded, setLocalExpanded] = useState(false);
+  const [prevForce, setPrevForce] = useState<boolean | null>(null);
+
+  // Sync local state when force mode changes (adjust-state-during-render pattern)
+  if (forceOutputExpanded !== prevForce) {
+    setPrevForce(forceOutputExpanded);
+    if (forceOutputExpanded !== null) {
+      setLocalExpanded(forceOutputExpanded);
+    }
+  }
+
   const outputExpanded = forceOutputExpanded !== null ? forceOutputExpanded : localExpanded;
   const canToggle = forceOutputExpanded === null;
-
-  // Sync local state when force mode changes
-  useEffect(() => {
-    if (forceOutputExpanded === null) return;
-    setLocalExpanded(forceOutputExpanded);
-  }, [forceOutputExpanded]);
 
   const prominent = getProminent(toolCall);
   const outputLines = toolCall.output?.split('\n') ?? [];

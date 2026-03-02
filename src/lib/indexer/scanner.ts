@@ -164,7 +164,7 @@ async function scanJsonlFiles(projectDir: string): Promise<SessionSummary[]> {
       let created = '';
       let modified = '';
       let gitBranch = '';
-      let projectPath = '';
+      const projectPath = '';
 
       // Read first lines for created timestamp and first user message
       const firstLines = await readFirstLines(filePath, 10);
@@ -254,7 +254,7 @@ export async function getProjects(): Promise<ProjectInfo[]> {
     const realPath = index?.entries?.[0]?.projectPath || await decodePath(encodedPath);
 
     let sessionCount = index?.entries?.length ?? 0;
-    let totalCost = 0;
+    const totalCost = 0;
     let lastActivity = '';
 
     if (index?.entries && index.entries.length > 0) {
